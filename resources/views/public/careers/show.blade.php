@@ -96,17 +96,12 @@
 
                 <div class="space-y-2 pt-4 border-t">
                     @php
-                        $loginRequired = \App\Models\Setting::get('recruitment_login_required', false);
+                        $applyUrl = $vacancy->external_url ?: 'https://ajiramarket.co.tz';
                     @endphp
-                    @if($loginRequired && !Auth::check())
-                        <a href="{{ route('login', ['flow' => 'career']) }}" class="gradient-btn w-full text-center py-4 rounded-2xl text-white font-extrabold text-xs shadow-md block">
-                            Apply Online Now
-                        </a>
-                    @else
-                        <a href="{{ route('public.careers.apply', $vacancy->vacancy_number) }}" class="gradient-btn w-full text-center py-4 rounded-2xl text-white font-extrabold text-xs shadow-md block">
-                            Apply Online Now
-                        </a>
-                    @endif
+                    <a href="{{ $applyUrl }}" target="_blank" rel="noopener noreferrer" class="gradient-btn w-full text-center py-4 rounded-2xl text-white font-extrabold text-xs shadow-md block flex items-center justify-center gap-2 hover:scale-[1.02] transition-all">
+                        <span>Apply on Ajira Market</span>
+                        <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
                     
                     <a href="{{ route('public.careers.jd', $vacancy->vacancy_number) }}" target="_blank" class="w-full text-center py-3 rounded-2xl border hover:bg-slate-50 block">
                         Download Job Description (PDF)
