@@ -203,7 +203,7 @@
                         @endif
                     </div>
                 </div>
-                <div class="min-w-0 max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-xs xl:max-w-sm">
+                <div class="min-w-0 max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-xs xl:max-w-[220px]">
                     <span class="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-slate-900 block leading-tight truncate">
                         {{ \App\Models\Setting::get('university_name', "SINGIDA TEACHERS' TRAINING COLLEGE (STTC) & OUT") }}
                     </span>
@@ -214,7 +214,7 @@
             </a>
 
             <!-- Desktop Navigation Menu -->
-            <nav class="hidden xl:flex items-center space-x-5 2xl:space-x-7 text-xs xl:text-sm font-semibold text-slate-600 shrink-0">
+            <nav class="hidden xl:flex items-center space-x-4 text-xs font-semibold text-slate-600">
                 <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'text-blue-800 active' : 'hover:text-blue-800' }}">Home</a>
                 
                 <!-- Mega Menu: Programmes -->
@@ -318,7 +318,7 @@
             </nav>
 
             <!-- Navigation Actions & CTAs -->
-            <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+            <div class="flex items-center space-x-2 sm:space-x-3">
                 
                 <!-- Quick Search Trigger Button -->
                 <button @click="searchModal = true" class="p-2 sm:p-2.5 rounded-xl bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-colors shrink-0" title="Search Site">
@@ -331,7 +331,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/></svg>
                             <span>Admission Portal</span>
                         </a>
-                        <a href="{{ route('public.careers.dashboard') }}" class="gradient-btn-gold px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl font-bold text-xs shadow-md hidden 2xl:flex items-center gap-1.5 hover:scale-105 transition-transform" title="Careers Portal Dashboard">
+                        <a href="{{ route('public.careers.dashboard') }}" class="gradient-btn-gold px-3.5 py-2 sm:px-4 sm:py-2 rounded-xl font-bold text-xs shadow-md hidden xl:flex items-center gap-1.5 hover:scale-105 transition-transform" title="Careers Portal Dashboard">
                             <span>Careers Portal</span>
                         </a>
                     @else
@@ -346,7 +346,7 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v7"/></svg>
                         <span>Admission</span>
                     </a>
-                    <a href="{{ route('public.careers.index') }}" class="gradient-btn-gold px-3.5 py-2 rounded-xl font-bold text-xs shadow-md hidden 2xl:flex items-center gap-1.5 hover:scale-105 transition-transform" title="Apply for Job - Created Vacancies">
+                    <a href="{{ route('public.careers.index') }}" class="gradient-btn-gold px-3.5 py-2 rounded-xl font-bold text-xs shadow-md hidden xl:flex items-center gap-1.5 hover:scale-105 transition-transform" title="Apply for Job - Created Vacancies">
                         <span>Apply for Job</span>
                     </a>
                 @endauth
