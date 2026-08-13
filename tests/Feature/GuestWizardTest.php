@@ -29,6 +29,9 @@ class GuestWizardTest extends TestCase
 
         // 2. Request the wizard page without authentication
         $response = $this->get('/applicant/apply-wizard');
+        if ($response->isRedirect()) {
+            $response = $this->followRedirects($response);
+        }
         $response->assertStatus(200);
 
         // Assert a guest user is created and logged in automatically
@@ -275,7 +278,7 @@ class GuestWizardTest extends TestCase
         $response = $this->get('/applicant/consent-notice');
         $response->assertStatus(200);
         $response->assertSee('Written University Consent Form');
-        $response->assertSee('Version 3.0');
+        $response->assertSee('3.0');
     }
 
     public function test_admin_can_delete_compliance_documents()

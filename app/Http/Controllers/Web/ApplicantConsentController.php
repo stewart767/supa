@@ -63,8 +63,13 @@ class ApplicantConsentController extends Controller
             }
 
             if ($consentValid) {
-                return redirect()->route('applicant.wizard', ['step' => 1]);
+                $progId = request()->get('programme_id') ?? session('selected_programme_id');
+                return redirect()->route('applicant.wizard', array_filter(['step' => 1, 'programme_id' => $progId]));
             }
+        }
+
+        if (request()->has('programme_id')) {
+            session(['selected_programme_id' => request()->get('programme_id')]);
         }
 
         return view('applicant.consent_notice', compact('user', 'activePolicy', 'activeTerms'));
@@ -155,7 +160,10 @@ class ApplicantConsentController extends Controller
         ]);
 
         $redirectUrl = route('applicant.wizard', ['step' => 1]);
-        if (session()->has('selected_job_id')) {
+        if (session()->has('selected_programme_id')) {
+            $redirectUrl = route('applicant.wizard', ['step' => 1, 'programme_id' => session('selected_programme_id')]);
+            session()->forget('selected_programme_id');
+        } elseif (session()->has('selected_job_id')) {
             $vacancy = \App\Models\Vacancy::find(session('selected_job_id'));
             $redirectUrl = $vacancy 
                 ? route('public.careers.apply', $vacancy->vacancy_number) 

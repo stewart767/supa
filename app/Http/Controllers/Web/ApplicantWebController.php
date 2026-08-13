@@ -82,9 +82,7 @@ class ApplicantWebController extends Controller
                            \App\Models\TermsCondition::where('status', 'Published')->exists();
 
         if ($consentRequired && $user && $user->applicant && !$user->applicant->initial_consent_given) {
-            if (request()->get('step', 1) > 1) {
-                return redirect()->route('applicant.wizard', ['step' => 1])->with('error', 'You must agree to the university admissions consent form to continue.');
-            }
+            return redirect()->route('applicant.consent.notice', array_filter(['programme_id' => request('programme_id')]));
         }
 
         $application = null;

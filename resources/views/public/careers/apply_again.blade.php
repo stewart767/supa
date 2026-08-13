@@ -40,8 +40,11 @@
 
         <!-- Actions -->
         <div class="space-y-4 max-w-xs mx-auto">
-            <a href="{{ route('public.careers.apply', $vacancy->vacancy_number) }}" class="gradient-btn w-full text-center py-4 rounded-2xl text-white font-black text-xs shadow-md block hover:scale-[1.02] transition-all uppercase tracking-wider">
-                Apply Again / Continue Application
+            @php
+                $applyUrl = $vacancy->external_url ?: 'https://ajiramarket.co.tz';
+            @endphp
+            <a href="{{ $applyUrl }}" target="_blank" rel="noopener noreferrer" class="gradient-btn w-full text-center py-4 rounded-2xl text-white font-black text-xs shadow-md block hover:scale-[1.02] transition-all uppercase tracking-wider">
+                Apply on Ajira Market &rarr;
             </a>
             
             <a href="{{ route('public.careers.dashboard') }}" class="w-full text-center py-3.5 rounded-2xl border text-xs font-bold hover:bg-slate-50 block text-slate-600 transition-colors">

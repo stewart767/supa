@@ -110,8 +110,8 @@ class PublicRecruitmentWebController extends Controller
 
     public function applyForm(string $vacancy_number)
     {
-        if (!\App\Models\Setting::get('enable_recruitment_module', true) || !\App\Models\Setting::get('enable_online_applications', true)) {
-            abort(404, 'Online applications are disabled.');
+        if (!\App\Models\Setting::get('enable_recruitment_module', true)) {
+            abort(404, 'Careers portal is currently disabled.');
         }
 
         $vacancy = Vacancy::with(['designation', 'position', 'category', 'campus'])->where('vacancy_number', $vacancy_number)->firstOrFail();
@@ -126,48 +126,8 @@ class PublicRecruitmentWebController extends Controller
             'selected_job_number' => $vacancy->vacancy_number,
         ]);
 
-        // Enforce login only if configured (defaults to false for public careers)
-        $loginRequired = \App\Models\Setting::get('recruitment_login_required', false);
-        if ($loginRequired && !Auth::check()) {
-            return redirect()->route('login', ['flow' => 'career'])
-                ->with('warning', 'To continue applying for this job, you must log in or register an account.');
-        }
-
-        $user = Auth::user();
-
-        // Fetch draft application if the user is already logged in
-        $draft = null;
-        if (Auth::check()) {
-            $draft = JobApplication::where('user_id', Auth::id())
-                ->where('vacancy_id', $vacancy->id)
-                ->whereNull('submitted_at')
-                ->first();
-        }
-
-        $positions = Position::where('status', 'active')->get();
-        $campuses = Campus::where('status', 'active')->get();
-        $designations = Designation::where('status', 'active')->get();
-        $categories = JobCategory::where('status', 'active')->get();
-
-        // Determine positionType (teacher, accountant, procurement, hr, ict, other)
-        $positionType = 'other';
-        $jobTitle = strtolower($vacancy->job_title);
-        $categoryName = $vacancy->category ? strtolower($vacancy->category->name) : '';
-        $positionName = $vacancy->position ? strtolower($vacancy->position->name) : '';
-
-        if (str_contains($jobTitle, 'teach') || str_contains($jobTitle, 'tutor') || str_contains($jobTitle, 'lecturer') || str_contains($jobTitle, 'instructor') || str_contains($jobTitle, 'academic') || str_contains($categoryName, 'teach') || str_contains($categoryName, 'academic') || str_contains($positionName, 'teach') || str_contains($positionName, 'tutor') || str_contains($positionName, 'lecturer')) {
-            $positionType = 'teacher';
-        } elseif (str_contains($jobTitle, 'account') || str_contains($jobTitle, 'finance') || str_contains($jobTitle, 'bursar') || str_contains($positionName, 'account') || str_contains($positionName, 'finance')) {
-            $positionType = 'accountant';
-        } elseif (str_contains($jobTitle, 'procurement') || str_contains($jobTitle, 'supply') || str_contains($jobTitle, 'store') || str_contains($positionName, 'procurement') || str_contains($positionName, 'supply')) {
-            $positionType = 'procurement';
-        } elseif (str_contains($jobTitle, 'resource') || str_contains($jobTitle, 'hr') || str_contains($positionName, 'resource') || str_contains($positionName, 'hr')) {
-            $positionType = 'hr';
-        } elseif (str_contains($jobTitle, 'ict') || str_contains($jobTitle, 'it ') || str_contains($jobTitle, 'information') || str_contains($jobTitle, 'system') || str_contains($jobTitle, 'programmer') || str_contains($jobTitle, 'computer') || str_contains($positionName, 'ict') || str_contains($positionName, 'it ') || str_contains($positionName, 'system') || str_contains($positionName, 'programmer')) {
-            $positionType = 'ict';
-        }
-
-        return view('public.careers.apply', compact('vacancy', 'draft', 'positions', 'campuses', 'designations', 'categories', 'positionType'));
+        $applyUrl = $vacancy->external_url ?: 'https://ajiramarket.co.tz';
+        return redirect()->away($applyUrl);
     }
 
     public function submitApplication(Request $request)

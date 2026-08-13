@@ -59,6 +59,10 @@ class EnsureConsentAccepted
             }
 
             if (!$consentValid) {
+                if ($request->has('programme_id')) {
+                    $request->session()->put('selected_programme_id', $request->get('programme_id'));
+                }
+
                 if ($request->expectsJson() || $request->wantsJson()) {
                     return response()->json([
                         'message' => 'Consent Required',

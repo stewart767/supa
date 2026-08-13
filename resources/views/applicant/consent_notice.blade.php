@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>Privacy Notice & Personal Data Consent - SUPA Admission Portal</title>
+    <title>Taarifa ya Faragha &amp; Ridhaa ya Data Binafsi - SUPA Admission Portal</title>
 
     <!-- Favicon -->
     @if(\App\Models\Setting::get('system_logo'))
@@ -268,7 +268,7 @@
                 <div class="h-16 w-16 bg-gradient-to-tr from-amber-500 to-amber-600 rounded-3xl flex items-center justify-center font-black text-2xl text-slate-950 shadow-[0_8px_16px_rgba(245,158,11,0.3)] transition-transform hover:scale-105 duration-300 border border-amber-400">S</div>
             @endif
             <h2 class="mt-5 text-center text-3xl font-black uppercase tracking-tight text-stone-900 sm:text-4xl drop-shadow-sm">
-                SUPA Admission System
+                Mfumo wa Udahili wa SUPA
             </h2>
             <p class="mt-2 text-center text-xs font-bold text-amber-700 uppercase tracking-widest bg-amber-500/10 px-4 py-1.5 rounded-full border border-amber-500/10">
                 {{ \App\Models\Setting::get('university_name', "Singida Teachers' Training College & OUT") }}
@@ -288,8 +288,8 @@
 
                 <!-- Page Header Plaque -->
                 <div class="border-b border-stone-200/80 pb-5 text-center">
-                    <h3 class="text-2xl font-black text-stone-950 tracking-tight">Privacy Notice & Personal Data Consent</h3>
-                    <p class="text-xs text-slate-500 mt-1.5 font-medium">Please review the details below regarding how your personal information is managed.</p>
+                    <h3 class="text-2xl font-black text-stone-950 tracking-tight">Taarifa ya Faragha &amp; Ridhaa ya Data Binafsi</h3>
+                    <p class="text-xs text-slate-500 mt-1.5 font-medium">Tafadhali kagua maelezo hapa chini kuhusu jinsi taarifa zako binafsi zinavyosimamiwa.</p>
                 </div>
 
                 <!-- Document Viewer Section (Expanded to fit the single column layout) -->
@@ -298,14 +298,14 @@
                     <div class="screen-inset rounded-2xl p-5 space-y-4">
                         <div class="flex justify-between items-center pb-3 border-b border-stone-150">
                             <div class="flex items-center gap-2">
-                                <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider block">Document Content:</span>
-                                <span class="px-2.5 py-0.5 rounded-full bg-amber-100/60 text-amber-900 border border-amber-200/50 text-[9px] font-extrabold uppercase">{{ $activePolicy->title ?? 'Privacy Policy' }}</span>
+                                <span class="text-[10px] font-black text-stone-400 uppercase tracking-wider block">Maudhui ya Hati:</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-amber-100/60 text-amber-900 border border-amber-200/50 text-[9px] font-extrabold uppercase">{{ $activePolicy->title ?? 'Sera ya Faragha' }}</span>
                                 @if(isset($activePolicy->version))
-                                    <span class="text-[11px] font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded border border-stone-200">Version {{ $activePolicy->version }}</span>
+                                    <span class="text-[11px] font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded border border-stone-200">Toleo {{ $activePolicy->version }}</span>
                                 @endif
                             </div>
                             <span class="px-3 py-1 rounded-xl bg-red-50 text-red-750 text-[10px] font-bold border border-red-200/30 flex items-center gap-1 shadow-sm font-heading">
-                                🔒 Protection Active
+                                🔒 Ulinzi Umewezeshwa
                             </span>
                         </div>
                         @if($activePolicy && $activePolicy->content)
@@ -325,7 +325,7 @@
                         @else
                             <div id="print-container" class="h-64 overflow-y-auto bg-white/50 p-5 rounded-xl border border-stone-200/40 text-[11.5px] text-stone-600 font-medium leading-relaxed space-y-4 no-select">
                                 <div class="prose prose-stone max-w-none text-[11.5px] font-medium text-stone-700">
-                                    <p class="italic text-stone-500 text-center py-8">Document content is not available.</p>
+                                    <p class="italic text-stone-500 text-center py-8">Maudhui ya hati hayapatikani.</p>
                                 </div>
                             </div>
                         @endif
@@ -340,8 +340,8 @@
                     <!-- Declarations Checklist -->
                     <div class="space-y-4">
                         <div class="flex items-center justify-between pb-2 border-b border-stone-200/60">
-                            <span class="text-xs font-black uppercase text-stone-600 tracking-wider">Required Declarations & Consents</span>
-                            <span class="text-[10px] text-stone-500 font-bold uppercase">All options must be checked</span>
+                            <span class="text-xs font-black uppercase text-stone-600 tracking-wider">Tamko na Ridhaa Zinazohitajika</span>
+                            <span class="text-[10px] text-stone-500 font-bold uppercase">Chaguzi zote lazima ziwekewe alama</span>
                         </div>
 
                         <!-- Individual checklist items in 3D tiles -->
@@ -353,7 +353,7 @@
                                         class="rounded border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer w-4.5 h-4.5">
                                 </div>
                                 <span class="leading-normal text-xs font-semibold text-stone-700 select-none">
-                                    I confirm that the information I provide is accurate and complete to the best of my knowledge.
+                                    Nathibitisha kuwa taarifa ninazotoa ni sahihi na kamili kwa uelewa wangu wote.
                                 </span>
                             </label>
 
@@ -364,7 +364,7 @@
                                         class="rounded border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer w-4.5 h-4.5">
                                 </div>
                                 <span class="leading-normal text-xs font-semibold text-stone-700 select-none">
-                                    I have read, understood, and agree to the University's Privacy Policy.
+                                    Nimesoma, nimeelewa, na ninakubaliana na Sera ya Faragha ya Chuo.
                                 </span>
                             </label>
 
@@ -375,7 +375,7 @@
                                         class="rounded border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer w-4.5 h-4.5">
                                 </div>
                                 <span class="leading-normal text-xs font-semibold text-stone-700 select-none">
-                                    I consent to the University collecting, storing, verifying, processing, and sharing my personal information for admission and academic administration.
+                                    Ninatoa idhini kwa Chuo kukusanya, kuhifadhi, kuthibitisha, kuchakata, na kushiriki taarifa zangu binafsi kwa ajili ya udahili na usimamizi wa kitaaluma.
                                 </span>
                             </label>
 
@@ -386,15 +386,15 @@
                                         class="rounded border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer w-4.5 h-4.5">
                                 </div>
                                 <span class="leading-normal text-xs font-semibold text-stone-700 select-none">
-                                    I understand my rights under the Personal Data Protection Act, 2022.
+                                    Naelewa haki zangu chini ya Sheria ya Ulinzi wa Taarifa Binafsi ya Mwaka 2022.
                                 </span>
                             </label>
 
                             <!-- 3D Master Toggle ("Accept All") stays LAST -->
                             <div class="master-toggle-3d p-4 rounded-2xl flex items-center justify-between gap-6 transition-all duration-300 mt-4">
                                 <div class="space-y-0.5">
-                                    <span class="text-xs font-black text-amber-950 uppercase tracking-wider block">Accept All Declarations</span>
-                                    <span class="text-[10px] text-amber-900 font-medium leading-normal block">Quickly consent and agree to all the terms, policies, and accuracy statements above.</span>
+                                    <span class="text-xs font-black text-amber-950 uppercase tracking-wider block">Kubali Tamko Zote (Accept All)</span>
+                                    <span class="text-[10px] text-amber-900 font-medium leading-normal block">Kukubali kwa haraka na kuridhia masharti yote, sera, na taarifa za usahihi hapo juu.</span>
                                 </div>
                                 <div class="flex-shrink-0">
                                     <label class="relative inline-flex items-center cursor-pointer select-none">
@@ -410,12 +410,12 @@
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-2">
                         <button type="button" @click="showWarning = true" 
                             class="btn-3d-decline w-full sm:w-auto">
-                            Decline & Exit
+                            Kataa &amp; Ondoka
                         </button>
                         
                         <button type="submit" :disabled="!allChecked()" 
                             class="btn-3d-accept w-full sm:w-auto">
-                            Proceed &rarr;
+                            Endelea &rarr;
                         </button>
                     </div>
                 </form>
@@ -427,22 +427,22 @@
                 <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-2 border border-red-200 shadow-[0_8px_16px_rgba(220,38,38,0.15)] animate-pulse">
                     <span class="text-2xl font-bold">⚠️</span>
                 </div>
-                <h3 class="text-xl font-black text-stone-900 uppercase tracking-wide">Application Consent Required</h3>
+                <h3 class="text-xl font-black text-stone-900 uppercase tracking-wide">Ridhaa ya Maombi Inahitajika</h3>
                 <p class="text-xs text-stone-500 max-w-md mx-auto leading-relaxed font-medium">
-                    To proceed with your application, you must review and accept the Privacy Policy. The university is legally required to obtain your consent under the Personal Data Protection Act, 2022.
+                    Ili kuendelea na maombi yako, lazima ukague na kukubaliana na Sera ya Faragha. Chuo kinatakiwa kisheria kupata ridhaa yako chini ya Sheria ya Ulinzi wa Taarifa Binafsi ya Mwaka 2022.
                 </p>
 
                 <!-- Actions -->
                 <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
                     <button type="button" @click="showWarning = false" 
                         class="btn-3d-decline w-full sm:w-auto">
-                        Review Terms
+                        Kagua Masharti
                     </button>
                     <form action="{{ route('applicant.consent.decline') }}" method="POST" class="w-full sm:w-auto">
                         @csrf
                         <button type="submit" 
                             class="btn-3d-accept w-full sm:w-auto bg-gradient-to-r from-red-500 to-red-650 hover:from-red-600 hover:to-red-700 border-red-700 shadow-[0_5px_0_0_#991b1b,_0_10px_18px_rgba(220,38,38,0.2)]">
-                            Exit Application
+                            Ondoka kwenye Maombi
                         </button>
                     </form>
                 </div>

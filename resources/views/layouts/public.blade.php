@@ -22,6 +22,38 @@
     <style>[x-cloak] { display: none !important; }</style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+@php
+    $modalProgrammesList = \App\Models\Programme::where('is_active', true)->orderBy('id')->get()->map(function($prog) {
+        $photoUrl = $prog->image;
+        if ($photoUrl && !\Illuminate\Support\Str::startsWith($photoUrl, 'http') && !\Illuminate\Support\Str::startsWith($photoUrl, 'data:')) {
+            $photoUrl = asset('storage/' . $photoUrl);
+        }
+        if (!$photoUrl) {
+            $photoUrl = match($prog->code) {
+                'BAED' => 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=800&auto=format&fit=crop',
+                'BSCED' => 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop',
+                'IMPTE' => 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop',
+                'Foundation' => 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop',
+                default => 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop',
+            };
+        }
+
+        return [
+            'id' => $prog->id,
+            'name' => $prog->name,
+            'code' => $prog->code,
+            'duration_years' => $prog->duration_years,
+            'department' => $prog->department ?? 'Department of Educational Studies',
+            'faculty' => $prog->faculty ?? 'Faculty of Education',
+            'description' => $prog->description ?? '',
+            'entry_requirements' => $prog->entry_requirements ?? '',
+            'annual_fee' => (float)$prog->annual_fee,
+            'monthly_fee' => (float)($prog->monthly_fee ?? ($prog->annual_fee / 10)),
+            'image' => $photoUrl,
+            'apply_url' => route('applicant.wizard') . '?programme_id=' . $prog->id,
+        ];
+    });
+@endphp
 </head>
 <body class="bg-white text-slate-800 antialiased min-h-screen flex flex-col relative selection:bg-amber-500 selection:text-slate-900"
       x-data="{ 
@@ -31,7 +63,24 @@
           programmeMenu: false, 
           admissionMenu: false,
           admissionModal: true,
-          init() {
+          admissionStep: 1,
+          progSearch: '',
+          modalProgrammes: {{ json_encode($modalProgrammesList) }},
+          get filteredProgrammes() {
+              if (!this.progSearch || !this.progSearch.trim()) {
+                  return this.modalProgrammes;
+              }
+              const q = this.progSearch.toLowerCase().trim();
+              return this.modalProgrammes.filter(p => 
+                  (p.name && p.name.toLowerCase().includes(q)) || 
+                  (p.code && p.code.toLowerCase().includes(q)) ||
+                  (p.department && p.department.toLowerCase().includes(q)) ||
+                  (p.faculty && p.faculty.toLowerCase().includes(q)) ||
+                  (p.entry_requirements && p.entry_requirements.toLowerCase().includes(q))
+              );
+          },
+          openAdmissionModal(step = 1) {
+              this.admissionStep = step;
               this.admissionModal = true;
           },
           closeAdmissionModal() {
@@ -530,7 +579,7 @@
         </button>
     </footer>
 
-    <!-- Admission Welcome Modal (First Visit) -->
+    <!-- Admission Welcome & Programme Selection Modal -->
     <div x-show="admissionModal" 
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -545,11 +594,11 @@
          x-cloak>
         
         <!-- Backdrop -->
-        <div class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity" 
+        <div class="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity" 
              @click="closeAdmissionModal()"></div>
 
         <!-- Modal Positioning Wrapper -->
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-6">
+        <div class="flex min-h-full items-center justify-center p-3 sm:p-6 text-center">
             <div x-show="admissionModal" 
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
@@ -558,61 +607,199 @@
                  x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  @click.stop
-                 class="relative transform overflow-hidden rounded-3xl bg-white p-8 sm:p-12 text-center shadow-2xl transition-all w-full max-w-2xl border border-slate-100">
+                 class="relative transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all duration-300 w-full border border-slate-100"
+                 :class="admissionStep === 2 ? 'max-w-4xl p-5 sm:p-8 text-left' : 'max-w-2xl p-8 sm:p-12 text-center'">
                 
-                <!-- Close Button (Top Right) -->
-                <button type="button" 
-                        @click="closeAdmissionModal()" 
-                        class="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none"
-                        title="Funga (Close)">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </button>
-
-                <!-- Icon Badge (Green Checkmark Badge) -->
-                <div class="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-6 shadow-sm">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
-
-                <!-- Main Title -->
-                <h2 id="admission-modal-title" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
-                    Usajili wa mtandao umefunguliwa
-                </h2>
-
-                <!-- Sub-headline -->
-                <p class="text-lg sm:text-xl font-black text-[#ff5500] tracking-tight mb-4">
-                    Jisajili kwaajili ya stashahada
-                </p>
-
-                <!-- Swahili Prompt -->
-                <p class="text-base sm:text-lg font-medium text-slate-700 max-w-xl mx-auto leading-relaxed mb-3">
-                    Je, ungependa <strong class="font-extrabold text-slate-900">kuanza usajili</strong> sasa, au <strong class="font-extrabold text-slate-900">kuendelea kutazama tovuti</strong> bila kuingia kwenye fomu ya maombi?
-                </p>
-
-                <!-- English Subtitle -->
-                <p class="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto mb-8 leading-normal">
-                    Online admission is open. Do you want to <strong class="font-semibold text-slate-700">start registration</strong> now, or <strong class="font-semibold text-slate-700">continue browsing</strong> the website?
-                </p>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-                    <a href="{{ route('applicant.wizard') }}" 
-                       @click="closeAdmissionModal()" 
-                       class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#ff5500] hover:bg-[#e04b00] text-white font-black text-sm sm:text-base shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-95 transition-all text-center">
-                        Anza usajili
-                    </a>
+                <!-- STEP 1: Welcome & Initial Prompt -->
+                <div x-show="admissionStep === 1" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     class="space-y-6">
+                    
+                    <!-- Close Button (Top Right) -->
                     <button type="button" 
                             @click="closeAdmissionModal()" 
-                            class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-800 hover:bg-slate-50 font-bold text-sm sm:text-base shadow-sm active:scale-95 transition-all text-center">
-                        Endelea kutazama tovuti
+                            class="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors focus:outline-none"
+                            title="Funga (Close)">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
+
+                    <!-- Icon Badge (Green Checkmark Badge) -->
+                    <div class="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-sm">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+
+                    <!-- Main Title -->
+                    <div>
+                        <h2 id="admission-modal-title" class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+                            Usajili wa mtandao umefunguliwa
+                        </h2>
+                        <p class="text-lg sm:text-xl font-black text-[#ff5500] tracking-tight">
+                            Jisajili kwaajili ya stashahada &amp; shahada
+                        </p>
+                    </div>
+
+                    <!-- Swahili Prompt -->
+                    <p class="text-base sm:text-lg font-medium text-slate-700 max-w-xl mx-auto leading-relaxed">
+                        Je, ungependa <strong class="font-extrabold text-slate-900">kuanza usajili</strong> sasa, au <strong class="font-extrabold text-slate-900">kuendelea kutazama tovuti</strong> bila kuingia kwenye fomu ya maombi?
+                    </p>
+
+                    <!-- English Subtitle -->
+                    <p class="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto leading-normal">
+                        Online admission is open. Do you want to <strong class="font-semibold text-slate-700">start registration</strong> now, or <strong class="font-semibold text-slate-700">continue browsing</strong> the website?
+                    </p>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                        <button type="button"
+                                @click="admissionStep = 2" 
+                                class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#ff5500] hover:bg-[#e04b00] text-white font-black text-sm sm:text-base shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2 cursor-pointer">
+                            <span>Anza usajili</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
+                        <button type="button" 
+                                @click="closeAdmissionModal()" 
+                                class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-800 hover:bg-slate-50 font-bold text-sm sm:text-base shadow-sm active:scale-95 transition-all text-center cursor-pointer">
+                            Endelea kutazama tovuti
+                        </button>
+                    </div>
+
+                    <!-- Footer Hint -->
+                    <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed pt-2">
+                        Kama tayari una namba ya maombi, unaweza kuitumia baadaye kupitia kiungo &quot;Apply Now&quot; au ukurasa wa maombi.
+                    </p>
                 </div>
 
-                <!-- Footer Hint -->
-                <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Kama tayari una namba ya maombi, unaweza kuitumia baadaye kupitia kiungo &quot;Apply Now&quot; au ukurasa wa maombi.
-                </p>
+                <!-- STEP 2: POP-OUT PROGRAMMES OFFERED -->
+                <div x-show="admissionStep === 2" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100"
+                     class="space-y-4">
+                    
+                    <!-- Top Action Bar -->
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <button type="button" 
+                                @click="admissionStep = 1" 
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                            <span>Rudi Nyuma (Back)</span>
+                        </button>
+
+                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-800 text-[10px] sm:text-[11px] font-extrabold tracking-wider uppercase border border-blue-200/60">
+                            CHUO CHA UALIMU SINGIDA (STTC) + OUT
+                        </span>
+
+                        <button type="button" 
+                                @click="closeAdmissionModal()" 
+                                class="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                                title="Funga (Close)">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Heading & Guide -->
+                    <div>
+                        <h3 class="text-lg sm:text-2xl font-black text-slate-900 tracking-tight">
+                            Chagua Programu ya Masomo (Select Programme)
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                            Chagua programu unayotaka kusomea kisha uendelee na <strong>Fomu ya Udahili na Tamko la Idhini (Consent Form)</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Search Filter Box -->
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <input type="text" 
+                               x-model="progSearch" 
+                               placeholder="Tafuta programu kwa jina au code (mf. BAED, BSCED, Ualimu, Sayansi)..." 
+                               class="w-full pl-10 pr-10 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff5500]/30 focus:border-[#ff5500] transition-all">
+                        <button x-show="progSearch" 
+                                @click="progSearch = ''" 
+                                type="button" 
+                                class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Scrollable List of Offered Programmes -->
+                    <div class="max-h-[50vh] sm:max-h-[55vh] overflow-y-auto space-y-3 pr-1 divide-y divide-slate-100">
+                        <template x-for="prog in filteredProgrammes" :key="prog.id">
+                            <div class="pt-3 first:pt-0 pb-1 group">
+                                <div class="p-3.5 sm:p-4 rounded-2xl bg-slate-50/60 hover:bg-orange-50/40 border border-slate-200/80 hover:border-orange-300 transition-all shadow-sm hover:shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+                                    
+                                    <!-- Programme Thumbnail & Info -->
+                                    <div class="flex items-start gap-3 sm:gap-4 flex-1">
+                                        <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 border border-slate-200 shadow-sm">
+                                            <img :src="prog.image" :alt="prog.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                            <span class="absolute bottom-0 inset-x-0 bg-slate-950/80 text-white text-[8px] sm:text-[9px] font-black text-center py-0.5" x-text="prog.code"></span>
+                                        </div>
+
+                                        <div class="space-y-1 flex-1 min-w-0">
+                                            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                                <span class="px-2 py-0.5 rounded-md bg-orange-100 text-[#ff5500] text-[9px] sm:text-[10px] font-black tracking-wide" x-text="'Code: ' + prog.code"></span>
+                                                <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 text-[9px] sm:text-[10px] font-bold" x-text="'Miaka ' + prog.duration_years"></span>
+                                                <span class="text-[10px] sm:text-[11px] text-slate-500 font-semibold truncate" x-text="prog.faculty"></span>
+                                            </div>
+
+                                            <h4 class="text-xs sm:text-sm font-extrabold text-slate-900 group-hover:text-[#ff5500] transition-colors leading-snug" x-text="prog.name"></h4>
+
+                                            <p class="text-[11px] text-slate-600 line-clamp-1" x-text="prog.description"></p>
+
+                                            <div class="flex items-center gap-2 pt-0.5 text-[10px] sm:text-[11px] text-slate-500 font-medium">
+                                                <span class="inline-flex items-center gap-1">
+                                                    <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    <span class="font-bold text-slate-700" x-text="prog.entry_requirements"></span>
+                                                </span>
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-slate-700 font-bold">Ada ya Fomu: <span class="text-amber-600 font-extrabold">TZS 20,000</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Button -->
+                                    <div class="md:shrink-0 flex items-center justify-end">
+                                        <a :href="prog.apply_url" 
+                                           @click="closeAdmissionModal()" 
+                                           class="w-full md:w-auto px-4 py-2.5 rounded-xl bg-[#ff5500] hover:bg-[#e04b00] text-white font-black text-xs shadow-md hover:shadow-orange-500/30 flex items-center justify-center gap-1.5 hover:scale-105 active:scale-95 transition-all text-center">
+                                            <span>Chagua &amp; Anza Fomu</span>
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Empty state -->
+                        <div x-show="filteredProgrammes.length === 0" class="p-8 text-center space-y-2">
+                            <div class="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-lg">🔍</div>
+                            <p class="text-xs font-bold text-slate-700">Hakuna programu iliyopatikana kwa neno &quot;<span x-text="progSearch"></span>&quot;</p>
+                            <button type="button" @click="progSearch = ''" class="text-xs font-bold text-[#ff5500] hover:underline cursor-pointer">
+                                Onyesha programu zote
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer Guidance -->
+                    <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-500">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-sm">📋</span>
+                            <span>Baada ya kuchagua programu, utaingia moja kwa moja kwenye <strong>Fomu ya Udahili &amp; Fomu ya Idhini (Consent Form)</strong>.</span>
+                        </div>
+                        <button type="button" 
+                                @click="closeAdmissionModal()" 
+                                class="text-slate-400 hover:text-slate-700 font-bold underline shrink-0 cursor-pointer">
+                            Endelea kutazama tovuti
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
