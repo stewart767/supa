@@ -28,14 +28,15 @@
     RewriteCond %{REQUEST_URI} ^/storage/(.*)$
     RewriteRule ^storage/(.*)$ storage/app/public/$1 [L]
 
-    # Transparently route requests to public/ directory
+    # Redirect root request to public/index.php directly
+    RewriteRule ^$ public/index.php [L]
+
+    # Transparently route other requests to public/ directory
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteCond %{REQUEST_URI} !^/storage/
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)$ public/$1 [L]
-
-    RewriteRule ^$ public/ [L]
 </IfModule>
 
 <IfModule mod_mime.c>

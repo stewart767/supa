@@ -30,7 +30,19 @@ class PaymentVerificationService
             ]);
 
             if ($status === 'paid') {
-                $payment->application->update(['status' => 'Under Review']);
+                $app = $payment->application;
+                $app->update([
+                    'status' => 'IN_PROGRESS',
+                    'current_step' => max($app->current_step, 6),
+                    'completion_percentage' => max($app->completion_percentage, 71),
+                    'last_activity_at' => now(),
+                ]);
+
+                \App\Models\ApplicationActivity::create([
+                    'application_id' => $app->id,
+                    'action' => 'Payment Received',
+                    'description' => "Payment of TZS " . number_format($payment->amount) . " received and verified.",
+                ]);
             }
 
             AuditLogService::log('payment_verified', "Payment for control number {$payment->control_number} marked as {$status} by staff ID {$staff->id}");

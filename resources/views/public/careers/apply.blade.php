@@ -88,7 +88,32 @@
                         
                         <div class="space-y-1.5">
                             <label class="block text-slate-500">Tarehe ya Kuzaliwa *</label>
-                            <input type="date" x-model="form.date_of_birth" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-950">
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <select x-model="dob_day" x-ref="dobDay" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-950">
+                                        <option value="">Siku (Day)</option>
+                                        @for ($d = 1; $d <= 31; $d++)
+                                            <option value="{{ $d }}">{{ $d }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                <div>
+                                    <select x-model="dob_month" x-ref="dobMonth" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-950">
+                                        <option value="">Mwezi (Month)</option>
+                                        @for ($m = 1; $m <= 12; $m++)
+                                            <option value="{{ $m }}">{{ $m }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                <div>
+                                    <select x-model="dob_year" x-ref="dobYear" required class="w-full p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-950">
+                                        <option value="">Mwaka (Year)</option>
+                                        @for ($y = 1950; $y <= 2026; $y++)
+                                            <option value="{{ $y }}">{{ $y }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="space-y-1.5">
@@ -591,6 +616,10 @@
                 mandatoryDocs: ['cv', 'cover_letter', 'academic_certificates', 'academic_transcripts', 'nida', 'passport_photo'],
                 optionalDocs: ['nssf', 'tin', 'professional_membership', 'recommendation_letter', 'training_certificates'],
 
+                dob_day: '',
+                dob_month: '',
+                dob_year: '',
+
                 form: {
                     full_name: '',
                     gender: '',
@@ -656,6 +685,11 @@
                 customQualifications: [],
 
                 init() {
+                    this.initDobFields();
+                    this.$watch('dob_day', () => this.updateDobString());
+                    this.$watch('dob_month', () => this.updateDobString());
+                    this.$watch('dob_year', () => this.updateDobString());
+
                     // Populate with draft values if available
                     @if(isset($draft))
                         const draft = {!! json_encode($draft) !!};
@@ -665,6 +699,7 @@
                         this.form.full_name = draft.full_name || '';
                         this.form.gender = draft.gender || '';
                         this.form.date_of_birth = draft.date_of_birth ? draft.date_of_birth.substring(0,10) : '';
+                        this.initDobFields();
                         this.form.nida_number = draft.nida_number || '';
                         this.form.tin_number = draft.tin_number || '';
                         this.form.nssf_number = draft.nssf_number || '';
@@ -727,6 +762,30 @@
                             });
                         }
                     });
+                },
+
+                initDobFields() {
+                    if (this.form && this.form.date_of_birth) {
+                        const parts = this.form.date_of_birth.split('-');
+                        if (parts.length === 3) {
+                            this.dob_year = String(parseInt(parts[0], 10));
+                            this.dob_month = String(parseInt(parts[1], 10));
+                            this.dob_day = String(parseInt(parts[2], 10));
+                        }
+                    }
+                },
+
+                updateDobString() {
+                    const day = this.dob_day || (this.$refs && this.$refs.dobDay ? this.$refs.dobDay.value : '');
+                    const month = this.dob_month || (this.$refs && this.$refs.dobMonth ? this.$refs.dobMonth.value : '');
+                    const year = this.dob_year || (this.$refs && this.$refs.dobYear ? this.$refs.dobYear.value : '');
+
+                    if (year && month && day) {
+                        const pad = (num) => num.toString().padStart(2, '0');
+                        this.form.date_of_birth = `${year}-${pad(month)}-${pad(day)}`;
+                    } else {
+                        this.form.date_of_birth = '';
+                    }
                 },
 
                 prevStep() {
@@ -1050,6 +1109,7 @@
 
                 // Save Wizard Step AJAX Call
                 saveAndContinue() {
+                    this.updateDobString();
                     this.errorsList = [];
                     const formData = new FormData();
                     formData.append('step', this.step);

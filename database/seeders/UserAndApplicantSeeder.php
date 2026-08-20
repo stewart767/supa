@@ -165,5 +165,79 @@ class UserAndApplicantSeeder extends Seeder
                 'verified_at' => now()->subDays(1),
             ]
         );
+
+        // 4. Seed documents for Application 1
+        $docFiles1 = [
+            'csee_certificate' => '89AjNR8h4efiy83cz9IDxpbmpxMkpnKte1lKevcD.pdf',
+            'diploma_certificate' => '8dU2ZvoPei5GByo7zeCE8fOpI6hnT6wuskJW9MyC.pdf',
+            'transcript' => 'C35C3ss10oDZo7SjyUPYkNM6gzu3yvEPJc7bbHEm.pdf',
+            'passport' => 'aHeJMnxym198NhQHlYcidLZxVzB7XTctP2pv1IIA.jpg',
+            'nida_id' => 'FPMJyWWMxoGH33Ys7sjEm2gqtdUCW5eI4FkDssDt.pdf',
+            'payment_receipt' => 'ZDiio1DRjk6Gaet4j2BHYi3sa3ui05qGYwzhSKsM.pdf',
+        ];
+
+        foreach ($docFiles1 as $type => $filename) {
+            $filePath = "documents/SUPA/2026/00001/{$filename}";
+            $fullPath = storage_path("app/public/{$filePath}");
+            
+            if (file_exists($fullPath)) {
+                \App\Models\ApplicationDocument::updateOrCreate(
+                    [
+                        'application_id' => $app1->id,
+                        'document_type' => $type,
+                    ],
+                    [
+                        'original_filename' => 'mock_' . $type . '.' . pathinfo($filename, PATHINFO_EXTENSION),
+                        'file_path' => $filePath,
+                        'file_size_bytes' => filesize($fullPath),
+                        'mime_type' => \Illuminate\Support\Str::endsWith($filename, '.jpg') ? 'image/jpeg' : 'application/pdf',
+                        'verification_status' => 'pending',
+                    ]
+                );
+            }
+        }
+
+        // 5. Seed documents for Application 2
+        // Copy files from 00004 to 00002 if they don't exist in 00002
+        $sourceDir2 = storage_path('app/public/documents/SUPA/2026/00004');
+        $destDir2 = storage_path('app/public/documents/SUPA/2026/00002');
+        if (!file_exists($destDir2)) {
+            mkdir($destDir2, 0755, true);
+        }
+
+        $docFiles2 = [
+            'csee_certificate' => 'EFUpf8rXQQSHgGRYfusVyrwYyzSlLAShIT7GdSrf.pdf',
+            'diploma_certificate' => 'IwsohV9wyZ3jsTsjF8iswzXSna227yyvPJUC8RYc.pdf',
+            'transcript' => 'Jz4DtYHtau4jaTBDlD1WYaHCGJ8TT01MMwLfjEbo.pdf',
+            'passport' => 'INnmX5eAZqbW8qFnrn0uAkeEJbjABA0CxCdY43Mh.jpg',
+            'nida_id' => 'KtIhzwXIzsEAdOCIJYaXbyiimpZ8D1QbkIqz5Awu.pdf',
+            'payment_receipt' => 'ZoyAudafsJfoijMpY1aIlcWyyxrE2KW3R9MOXT39.pdf',
+        ];
+
+        foreach ($docFiles2 as $type => $filename) {
+            $sourceFile = "{$sourceDir2}/{$filename}";
+            $destFile = "{$destDir2}/{$filename}";
+            
+            if (file_exists($sourceFile)) {
+                if (!file_exists($destFile)) {
+                    copy($sourceFile, $destFile);
+                }
+                
+                $filePath = "documents/SUPA/2026/00002/{$filename}";
+                \App\Models\ApplicationDocument::updateOrCreate(
+                    [
+                        'application_id' => $app2->id,
+                        'document_type' => $type,
+                    ],
+                    [
+                        'original_filename' => 'mock_' . $type . '.' . pathinfo($filename, PATHINFO_EXTENSION),
+                        'file_path' => $filePath,
+                        'file_size_bytes' => filesize($destFile),
+                        'mime_type' => \Illuminate\Support\Str::endsWith($filename, '.jpg') ? 'image/jpeg' : 'application/pdf',
+                        'verification_status' => 'pending',
+                    ]
+                );
+            }
+        }
     }
 }

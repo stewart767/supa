@@ -80,12 +80,23 @@ class ApplicationWizardController extends Controller
                 $validated['admission_type']
             );
 
+            $oldStep = $application->current_step;
+
             $this->workflowService->saveAcademicInfo($application, $validated);
 
             // Request real NMB control number from Singida after academic data is stored.
             $this->workflowService->ensurePaymentWithSingidaControlNumber(
                 $application->fresh(['applicant.user', 'programme', 'academicProfile', 'academicYear', 'payment'])
             );
+
+            if ($oldStep >= 4) {
+                $application->update([
+                    'current_step' => max($application->current_step, 5),
+                    'completion_percentage' => max($application->completion_percentage, 57),
+                    'last_activity_at' => now(),
+                ]);
+                $this->workflowService->logActivity($application, 'Step 4 Completed', 'Applicant completed Programme Selection.');
+            }
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => $e->getMessage() ?: 'Failed to sync application with Singida for an NMB control number.',
@@ -355,6 +366,43 @@ class ApplicationWizardController extends Controller
             $request->merge(['whatsapp_number' => null]);
         }
 
+        $phoneInput = $request->input('phone');
+        if ($phoneInput) {
+            $normalized = \App\Services\ApplicationVerificationService::normalizePhone($phoneInput);
+            
+            $existingUser = \App\Models\User::where('id', '!=', $user->id)
+                ->where(function ($q) use ($phoneInput, $normalized) {
+                    $q->where('phone', $phoneInput);
+                    if (!empty($normalized)) {
+                        $q->orWhere('phone', $normalized);
+                        if (strlen($normalized) >= 5) {
+                            $q->orWhere('phone', 'like', "%{$normalized}")
+                              ->orWhere('phone', 'like', "%" . substr($normalized, 1));
+                        }
+                    }
+                })->first();
+
+            if ($existingUser && $existingUser->applicant) {
+                $app = Application::where('applicant_id', $existingUser->applicant->id)
+                    ->whereNotIn('status', ['Approved', 'Rejected', 'Expired'])
+                    ->latest()
+                    ->first();
+
+                if ($app) {
+                    $allowMultiple = (bool) \App\Models\Setting::get('allow_multiple_applications', false);
+
+                    if (!$allowMultiple) {
+                        return response()->json([
+                            'status' => 'duplicate',
+                            'message' => 'Namba hii ya simu tayari inatumika katika ombi jingine. (This phone number is already associated with an active application.)',
+                            'application_number' => $app->application_number,
+                            'phone' => $existingUser->phone,
+                        ]);
+                    }
+                }
+            }
+        }
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email,' . $user->id],
@@ -375,6 +423,7 @@ class ApplicationWizardController extends Controller
         $activePolicy = \App\Models\PrivacyPolicy::where('status', 'Published')->latest('effective_date')->first();
         $version = $activePolicy ? $activePolicy->version : '2.1';
 
+        $application = null;
         if ($user->applicant) {
             $user->applicant->update([
                 'whatsapp_number' => $validated['whatsapp_number'] ?? null,
@@ -382,6 +431,9 @@ class ApplicationWizardController extends Controller
                 'initial_consent_at' => now(),
                 'initial_consent_version' => $version,
             ]);
+
+            // INITIALIZE THE APPLICATION RECORD IMMEDIATELY (Step 1)
+            $application = $this->workflowService->initializeOrGetApplication($user->applicant);
         }
 
         return response()->json([
@@ -391,7 +443,8 @@ class ApplicationWizardController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'whatsapp_number' => $user->applicant?->whatsapp_number ?? null,
-            ]
+            ],
+            'application' => $application ? new ApplicationResource($application) : null,
         ]);
     }
 

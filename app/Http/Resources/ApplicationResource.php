@@ -35,6 +35,8 @@ class ApplicationResource extends JsonResource
             'singida_admission_id' => $this->singida_admission_id,
             'singida_synced_at' => $this->singida_synced_at?->toIso8601String(),
             'submitted_at' => $this->submitted_at?->toIso8601String(),
+            'current_step' => $this->current_step,
+            'completion_percentage' => $this->completion_percentage,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

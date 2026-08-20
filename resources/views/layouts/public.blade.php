@@ -313,7 +313,37 @@
                 @if(\App\Models\Setting::get('show_news_announcements', true))
                     <a href="{{ route('public.news') }}" class="nav-link {{ request()->routeIs('public.news') ? 'text-blue-800 active' : 'hover:text-blue-800' }}">News</a>
                 @endif
-                <a href="{{ route('public.careers.index') }}" class="nav-link {{ request()->routeIs('public.careers.*') ? 'text-blue-800 active' : 'hover:text-blue-800' }}">Careers</a>
+                <!-- Mega Menu: Careers -->
+                <div class="relative" x-data="{ careerMenu: false }" @mouseenter="careerMenu = true" @mouseleave="careerMenu = false">
+                    <button class="nav-link flex items-center gap-1.5 py-2 {{ request()->routeIs('public.careers.*') ? 'text-blue-800 active' : 'hover:text-blue-800' }}">
+                        <span>Careers</span>
+                        <svg class="w-4 h-4 text-slate-500 transition-transform" :class="{ 'rotate-180': careerMenu }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    
+                    <div x-show="careerMenu" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 translate-y-2"
+                         class="absolute left-0 mt-1 w-80 bg-white/95 backdrop-blur-2xl border border-slate-200 rounded-3xl shadow-2xl p-4 z-50 text-xs" x-cloak>
+                        <a href="{{ route('public.careers.index') }}" class="flex items-start space-x-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">1</div>
+                            <div>
+                                <span class="font-bold text-slate-900 block">Job Vacancies</span>
+                                <span class="text-[11px] text-slate-500">Explore open academic & administrative roles</span>
+                            </div>
+                        </a>
+                        <a href="{{ route('public.careers.track') }}" class="flex items-start space-x-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs shrink-0">2</div>
+                            <div>
+                                <span class="font-bold text-slate-900 block">Track Job Application</span>
+                                <span class="text-[11px] text-slate-500">Track and resume incomplete job applications</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
                 <a href="{{ route('public.contact') }}" class="nav-link {{ request()->routeIs('public.contact') ? 'text-blue-800 active' : 'hover:text-blue-800' }}">Contact</a>
             </nav>
 
@@ -384,7 +414,8 @@
                         <a href="{{ route('public.news') }}" class="block p-3 rounded-xl hover:bg-slate-50 text-slate-600">News & Events</a>
                     @endif
                     <a href="{{ route('public.faqs') }}" class="block p-3 rounded-xl hover:bg-slate-50 text-slate-600">FAQs</a>
-                    <a href="{{ route('public.careers.index') }}" class="block p-3 rounded-xl hover:bg-slate-50 text-slate-600">Careers</a>
+                    <a href="{{ route('public.careers.index') }}" class="block p-3 rounded-xl hover:bg-slate-50 text-slate-600 font-bold">Careers - Vacancies</a>
+                    <a href="{{ route('public.careers.track') }}" class="block p-3 rounded-xl hover:bg-slate-50 text-slate-600 font-bold">Careers - Track Application</a>
                     <a href="{{ route('public.contact') }}" class="block p-3 rounded-xl hover:bg-slate-50 text-slate-600">Contact Office</a>
                 </nav>
             </div>

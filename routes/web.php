@@ -232,6 +232,7 @@ Route::prefix('api/v1/admin')->middleware(['auth'])->group(function () {
 */
 // Public Career Portal Routes
 Route::get('/careers', [PublicRecruitmentWebController::class, 'index'])->name('public.careers.index');
+Route::get('/careers/track-application', [PublicRecruitmentWebController::class, 'trackApplicationPage'])->name('public.careers.track');
 Route::get('/careers/vacancy/{vacancy_number}', [PublicRecruitmentWebController::class, 'show'])->name('public.careers.show');
 Route::get('/careers/jd/{vacancy_number}', [PublicRecruitmentWebController::class, 'downloadJd'])->name('public.careers.jd');
 

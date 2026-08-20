@@ -141,6 +141,95 @@
                 </div>
             </div>
 
+            <!-- Progressive Save Checklist & Progress Bar -->
+            @if(in_array($application->status, ['Draft', 'IN_PROGRESS', 'Pending Payment', 'PAYMENT_PENDING'], true))
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-extrabold text-slate-900 text-sm">Progression Step Check-List</h3>
+                            <p class="text-[10px] text-slate-500">Your application progress is saved progressively. You can resume at any time.</p>
+                        </div>
+                        <span class="px-2.5 py-1 bg-amber-500/10 text-amber-600 rounded-lg text-xs font-extrabold tracking-wider">{{ $application->completion_percentage }}% Completed</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 rounded-full h-2.5 shadow-inner">
+                        <div class="bg-gradient-to-r from-amber-500 to-amber-600 h-2.5 rounded-full shadow" style="width: {{ $application->completion_percentage }}%"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 pt-2">
+                        <!-- Step 1 -->
+                        <div class="p-4 rounded-2xl border flex items-center space-x-3 {{ $application->current_step >= 2 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                            <span class="text-lg font-black">{{ $application->current_step >= 2 ? '✓' : '○' }}</span>
+                            <div class="text-xs">
+                                <span class="font-black block">Step 1</span>
+                                <span class="font-medium text-[10px] {{ $application->current_step >= 2 ? 'text-emerald-600' : 'text-slate-400' }}">Consent & Account Info</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="p-4 rounded-2xl border flex items-center space-x-3 {{ $application->current_step >= 3 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                            <span class="text-lg font-black">{{ $application->current_step >= 3 ? '✓' : '○' }}</span>
+                            <div class="text-xs">
+                                <span class="font-black block">Step 2</span>
+                                <span class="font-medium text-[10px] {{ $application->current_step >= 3 ? 'text-emerald-600' : 'text-slate-400' }}">Personal Details</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="p-4 rounded-2xl border flex items-center space-x-3 {{ $application->current_step >= 4 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                            <span class="text-lg font-black">{{ $application->current_step >= 4 ? '✓' : '○' }}</span>
+                            <div class="text-xs">
+                                <span class="font-black block">Step 3</span>
+                                <span class="font-medium text-[10px] {{ $application->current_step >= 4 ? 'text-emerald-600' : 'text-slate-400' }}">Academic Profile</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="p-4 rounded-2xl border flex items-center space-x-3 {{ $application->current_step >= 5 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                            <span class="text-lg font-black">{{ $application->current_step >= 5 ? '✓' : '○' }}</span>
+                            <div class="text-xs">
+                                <span class="font-black block">Step 4</span>
+                                <span class="font-medium text-[10px] {{ $application->current_step >= 5 ? 'text-emerald-600' : 'text-slate-400' }}">Programme Selection</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 5 -->
+                        <div class="p-4 rounded-2xl border flex items-center space-x-3 {{ $application->current_step >= 6 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                            <span class="text-lg font-black">{{ $application->current_step >= 6 ? '✓' : '○' }}</span>
+                            <div class="text-xs">
+                                <span class="font-black block">Step 5</span>
+                                <span class="font-medium text-[10px] {{ $application->current_step >= 6 ? 'text-emerald-600' : 'text-slate-400' }}">Admissions Fee Payment</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 6 -->
+                        <div class="p-4 rounded-2xl border flex items-center space-x-3 {{ $application->current_step >= 7 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                            <span class="text-lg font-black">{{ $application->current_step >= 7 ? '✓' : '○' }}</span>
+                            <div class="text-xs">
+                                <span class="font-black block">Step 6</span>
+                                <span class="font-medium text-[10px] {{ $application->current_step >= 7 ? 'text-emerald-600' : 'text-slate-400' }}">Documents Upload</span>
+                            </div>
+                        </div>
+
+                        <!-- Step 7 -->
+                        <div class="p-4 rounded-2xl border flex items-center space-x-3 {{ $application->status === 'SUBMITTED' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-slate-50 border-slate-200 text-slate-500' }}">
+                            <span class="text-lg font-black">{{ $application->status === 'SUBMITTED' ? '✓' : '○' }}</span>
+                            <div class="text-xs">
+                                <span class="font-black block">Step 7</span>
+                                <span class="font-medium text-[10px] {{ $application->status === 'SUBMITTED' ? 'text-emerald-600' : 'text-slate-400' }}">Review & Signature</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-3">
+                        <a href="{{ route('applicant.wizard') }}?step={{ $application->current_step }}" class="gradient-btn-gold px-8 py-3.5 rounded-2xl text-slate-950 font-black text-xs tracking-wider shadow-md hover:scale-105 transition-transform inline-block">
+                            Fungua Hatua ya {{ $application->current_step }} (Continue Application Step {{ $application->current_step }}) &rarr;
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <!-- Automatic Payment Status / Action Banner Card -->
             @if(($application->payment->payment_status ?? '') !== 'paid')
                 <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-blue-900 p-6 sm:p-8 rounded-3xl border border-blue-950 text-white flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">

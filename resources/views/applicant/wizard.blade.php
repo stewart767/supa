@@ -292,7 +292,8 @@
         $consentRequired = ($activePolicy || $activeTerms);
         $hasConsented = isset($user->applicant) && $user->applicant->initial_consent_given;
         $consentGivenVal = (!$consentRequired || $hasConsented) ? 'true' : 'false';
-        $currentStepVal = (!$consentRequired || $hasConsented) ? request()->get('step', 1) : 1;
+        $defaultStep = $application->current_step ?? 1;
+        $currentStepVal = (!$consentRequired || $hasConsented) ? request()->get('step', $defaultStep) : 1;
 
         $existingDiploma = $application?->academicProfile?->diploma_programme_name ?? '';
         $standardDiplomas = [
@@ -345,6 +346,9 @@
                     password: '',
                     password_confirmation: ''
                 },
+                dob_day: '',
+                dob_month: '',
+                dob_year: '',
                 personal: {
                     gender: {!! json_encode($user->applicant?->gender ?? 'male') !!},
                     date_of_birth: {!! json_encode(optional($user->applicant?->date_of_birth)->toDateString() ?? '') !!},
@@ -422,6 +426,11 @@
                 paymentPollingTimer: null,
 
                 init() {
+                    this.initDobFields();
+                    this.$watch('dob_day', () => this.updateDobString());
+                    this.$watch('dob_month', () => this.updateDobString());
+                    this.$watch('dob_year', () => this.updateDobString());
+
                     this.$watch('currentStep', (newStep) => {
                         if (newStep === 5) {
                             this.startPaymentAutoDetect();
@@ -432,6 +441,30 @@
 
                     if (this.currentStep === 5) {
                         this.startPaymentAutoDetect();
+                    }
+                },
+
+                initDobFields() {
+                    if (this.personal && this.personal.date_of_birth) {
+                        const parts = this.personal.date_of_birth.split('-');
+                        if (parts.length === 3) {
+                            this.dob_year = String(parseInt(parts[0], 10));
+                            this.dob_month = String(parseInt(parts[1], 10));
+                            this.dob_day = String(parseInt(parts[2], 10));
+                        }
+                    }
+                },
+
+                updateDobString() {
+                    const day = this.dob_day || (this.$refs && this.$refs.dobDay ? this.$refs.dobDay.value : '');
+                    const month = this.dob_month || (this.$refs && this.$refs.dobMonth ? this.$refs.dobMonth.value : '');
+                    const year = this.dob_year || (this.$refs && this.$refs.dobYear ? this.$refs.dobYear.value : '');
+
+                    if (year && month && day) {
+                        const pad = (num) => num.toString().padStart(2, '0');
+                        this.personal.date_of_birth = `${year}-${pad(month)}-${pad(day)}`;
+                    } else {
+                        this.personal.date_of_birth = '';
                     }
                 },
 
@@ -655,6 +688,7 @@
                 errorMsg: '',
                 
                 savePersonal() {
+                    this.updateDobString();
                     const trimmedId = (this.idNumber || '').trim();
                     if (!trimmedId) {
                         const label = this.idType === 'nida' ? 'Kitambulisho cha NIDA' : (this.idType === 'voter' ? 'Kitambulisho cha Kura' : 'Kitambulisho cha Kazi');
@@ -1137,7 +1171,32 @@
                         </div>
                         <div>
                             <label class="block text-xs font-extrabold text-slate-700 uppercase mb-2">Tarehe ya Kuzaliwa (Date of Birth)</label>
-                            <input type="date" x-model="personal.date_of_birth" required class="w-full px-4 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
+                            <div class="grid grid-cols-3 gap-3">
+                                <div>
+                                    <select x-model="dob_day" x-ref="dobDay" required class="w-full px-3 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
+                                        <option value="">Siku (Day)</option>
+                                        @for ($d = 1; $d <= 31; $d++)
+                                            <option value="{{ $d }}">{{ $d }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                <div>
+                                    <select x-model="dob_month" x-ref="dobMonth" required class="w-full px-3 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
+                                        <option value="">Mwezi (Month)</option>
+                                        @for ($m = 1; $m <= 12; $m++)
+                                            <option value="{{ $m }}">{{ $m }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                                <div>
+                                    <select x-model="dob_year" x-ref="dobYear" required class="w-full px-3 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
+                                        <option value="">Mwaka (Year)</option>
+                                        @for ($y = 1950; $y <= 2026; $y++)
+                                            <option value="{{ $y }}">{{ $y }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1297,9 +1356,16 @@
 
                                 <!-- Mode A: Numeric GPA input -->
                                 <div x-show="scoreType === 'gpa'">
-                                    <input type="number" step="0.01" min="0.0" max="5.0" x-model="academic.gpa" placeholder="Mfano: 3.50 au 4.20" 
-                                           class="w-full px-4 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
-                                    <p class="text-[10px] text-slate-500 mt-1">Ingiza alama kamili ya GPA (Kuanzia 2.00 hadi 5.00).</p>
+                                    <select x-model="academic.gpa" 
+                                            class="w-full px-4 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
+                                        <option value="">-- Chagua GPA --</option>
+                                        <option value="5.00">5.0 - 5.09</option>
+                                        <option value="4.00">4.0 - 4.09</option>
+                                        <option value="3.00">3.0 - 3.09</option>
+                                        <option value="2.00">2.0 - 2.09</option>
+                                        <option value="1.00">1.0 - 1.09</option>
+                                    </select>
+                                    <p class="text-[10px] text-slate-500 mt-1">Chagua alama ya GPA.</p>
                                 </div>
 
                                 <!-- Mode B: Grade Classification Dropdown -->
@@ -1368,7 +1434,13 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-extrabold text-slate-700 uppercase mb-2">8. ACSEE Points</label>
-                                <input type="number" x-model="academic.acsee_points" placeholder="e.g. 6" class="w-full px-4 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
+                                <select x-model="academic.acsee_points" 
+                                        class="w-full px-4 py-3.5 rounded-2xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold outline-none focus:ring-2 focus:ring-amber-500">
+                                    <option value="">-- Chagua Pointi --</option>
+                                    @for ($pts = 1; $pts <= 9; $pts++)
+                                        <option value="{{ $pts }}">{{ $pts }} Pointi</option>
+                                    @endfor
+                                </select>
                             </div>
                             <div></div>
                         </div>

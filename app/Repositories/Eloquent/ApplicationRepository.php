@@ -74,7 +74,7 @@ class ApplicationRepository implements ApplicationRepositoryInterface
     {
         return Application::with(['programme', 'documents', 'payment', 'academicProfile', 'admissionLetter'])
             ->where('applicant_id', $applicantId)
-            ->latest()
+            ->latest('id')
             ->first();
     }
 

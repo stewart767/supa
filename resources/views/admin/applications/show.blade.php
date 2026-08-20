@@ -502,6 +502,50 @@
             </div>
         </div>
 
+        <!-- APPLICATION ACTIVITY TIMELINE TRAIL -->
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-md space-y-6">
+            <h3 class="font-extrabold text-slate-900 text-base border-b border-slate-100 pb-3 flex items-center gap-2">
+                <span>⏳ Application Activity History & Event Trail</span>
+            </h3>
+
+            @if($application->activities->count() > 0)
+                <div class="flow-root text-xs">
+                    <ul role="list" class="-mb-8">
+                        @foreach($application->activities as $idx => $activity)
+                            <li>
+                                <div class="relative pb-8">
+                                    @if($idx !== $application->activities->count() - 1)
+                                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-slate-200" aria-hidden="true"></span>
+                                    @endif
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full bg-blue-100 border border-blue-200 text-blue-600 flex items-center justify-center font-bold text-xs ring-8 ring-white shrink-0">
+                                                ⚡
+                                            </span>
+                                        </div>
+                                        <div class="flex-1 min-w-0 pt-1.5 flex justify-between space-x-4">
+                                            <div>
+                                                <p class="text-xs font-extrabold text-slate-950">
+                                                    [{{ strtoupper($activity->action) }}] <span class="font-medium text-slate-700">{{ $activity->description }}</span>
+                                                </p>
+                                            </div>
+                                            <div class="text-right text-[10px] whitespace-nowrap text-slate-500 font-bold">
+                                                <time datetime="{{ $activity->created_at->toIso8601String() }}">{{ $activity->created_at->format('d M Y, h:i A') }} ({{ $activity->created_at->diffForHumans() }})</time>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @else
+                <div class="p-6 rounded-2xl bg-slate-50 text-center space-y-1.5">
+                    <p class="text-xs font-bold text-slate-500">No progressive activity events recorded for this application yet.</p>
+                </div>
+            @endif
+        </div>
+
         <!-- DOCUMENT REJECTION MODAL -->
         <div x-show="docRejectModal" class="fixed inset-0 bg-white/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-cloak>
             <div class="bg-white max-w-md w-full p-8 rounded-3xl shadow-2xl border border-slate-200 space-y-4">

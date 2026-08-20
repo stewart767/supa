@@ -30,6 +30,10 @@ class Application extends Model
         'is_public_submission',
         'singida_admission_id',
         'singida_synced_at',
+        'current_step',
+        'completion_percentage',
+        'expires_at',
+        'last_activity_at',
     ];
 
     protected function casts(): array
@@ -38,6 +42,8 @@ class Application extends Model
             'submitted_at' => 'datetime',
             'reviewed_at' => 'datetime',
             'singida_synced_at' => 'datetime',
+            'expires_at' => 'datetime',
+            'last_activity_at' => 'datetime',
         ];
     }
 
@@ -84,6 +90,11 @@ class Application extends Model
     public function consent(): HasOne
     {
         return $this->hasOne(ApplicationConsent::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(ApplicationActivity::class);
     }
 
     public function reviewer(): BelongsTo

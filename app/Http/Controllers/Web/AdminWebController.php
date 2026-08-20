@@ -53,7 +53,9 @@ class AdminWebController extends Controller
 
     public function showApplication(Application $application)
     {
-        $application->load(['applicant.user', 'academicProfile', 'documents', 'payment', 'admissionLetter']);
+        $application->load(['applicant.user', 'academicProfile', 'documents', 'payment', 'admissionLetter', 'activities' => function ($q) {
+            $q->orderBy('created_at', 'desc');
+        }]);
         return view('admin.applications.show', compact('application'));
     }
 
@@ -288,6 +290,8 @@ class AdminWebController extends Controller
             'passwordRequireSpecial' => (bool) Setting::get('password_require_special', false),
             'applicantAutoActivate' => (bool) Setting::get('applicant_auto_activate', true),
             'showNewsAnnouncements' => (bool) Setting::get('show_news_announcements', true),
+            'allowMultipleApplications' => (bool) Setting::get('allow_multiple_applications', false),
+            'draftExpirationDays' => (int) Setting::get('draft_expiration_days', 30),
             'topAnnouncementBadge' => Setting::get('top_announcement_badge', '2026/2027'),
             'topAnnouncementText' => Setting::get('top_announcement_text', 'Online Admissions Now Open for Undergraduate & Postgraduate Programmes'),
             'topAnnouncementLinkText' => Setting::get('top_announcement_link_text', 'Track Application Status'),
@@ -942,6 +946,8 @@ class AdminWebController extends Controller
             'passwordRequireSpecial' => ['nullable', 'boolean'],
             'applicantAutoActivate' => ['nullable', 'boolean'],
             'showNewsAnnouncements' => ['nullable', 'boolean'],
+            'allowMultipleApplications' => ['nullable', 'boolean'],
+            'draftExpirationDays' => ['nullable', 'integer', 'min:1', 'max:365'],
             'topAnnouncementBadge' => ['nullable', 'string'],
             'topAnnouncementText' => ['nullable', 'string'],
             'topAnnouncementLinkText' => ['nullable', 'string'],
@@ -960,6 +966,8 @@ class AdminWebController extends Controller
         Setting::set('password_require_special', $request->boolean('passwordRequireSpecial'), 'admission', 'boolean');
         Setting::set('applicant_auto_activate', $request->boolean('applicantAutoActivate'), 'admission', 'boolean');
         Setting::set('show_news_announcements', $request->boolean('showNewsAnnouncements'), 'admission', 'boolean');
+        Setting::set('allow_multiple_applications', $request->boolean('allowMultipleApplications'), 'admission', 'boolean');
+        Setting::set('draft_expiration_days', $request->integer('draftExpirationDays', 30), 'admission', 'integer');
 
         if ($request->has('topAnnouncementBadge')) Setting::set('top_announcement_badge', $request->topAnnouncementBadge, 'general', 'string');
         if ($request->has('topAnnouncementText')) Setting::set('top_announcement_text', $request->topAnnouncementText, 'general', 'string');
@@ -970,7 +978,7 @@ class AdminWebController extends Controller
         AuditLog::create([
             'user_id' => auth()->id(),
             'action' => 'Settings Update',
-            'description' => 'Updated System Settings (Academic Year, Fees, Email/Phone & Top Announcement)',
+            'description' => 'Updated System Settings (Academic Year, Fees, Email/Phone, Multiple Apps & Draft Expiry)',
             'ip_address' => $request->ip()
         ]);
 

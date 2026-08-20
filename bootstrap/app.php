@@ -23,6 +23,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'consent.accepted' => \App\Http\Middleware\EnsureConsentAccepted::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'api/v1/public/*',
+            'api/v1/integrations/*',
+            'api/v1/auth/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1/public')->group(function () {
     Route::get('/programmes', [PublicPortalController::class, 'programmes']);
     Route::post('/track-application', [PublicPortalController::class, 'trackApplication']);
+    Route::post('/resume-otp/send', [PublicPortalController::class, 'sendResumeOtp']);
+    Route::post('/resume-otp/verify', [PublicPortalController::class, 'verifyResumeOtp']);
+    Route::post('/resume-direct', [PublicPortalController::class, 'resumeDirect']);
+    Route::post('/careers/track-application', [PublicPortalController::class, 'trackJobApplication']);
+    Route::post('/careers/resume-direct', [PublicPortalController::class, 'resumeJobDirect']);
     Route::get('/news', [PublicPortalController::class, 'news']);
     Route::get('/events', [PublicPortalController::class, 'events']);
     Route::get('/faqs', [PublicPortalController::class, 'faqs']);

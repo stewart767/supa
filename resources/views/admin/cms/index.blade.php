@@ -1324,6 +1324,20 @@
                             </div>
                         </div>
 
+                        <div class="flex items-center space-x-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <input type="checkbox" id="allowMultipleApplicationsCheck" x-model="settings.allowMultipleApplications" class="rounded text-amber-500">
+                            <div>
+                                <label for="allowMultipleApplicationsCheck" class="block font-bold text-slate-900">Allow Multiple Applications per Phone</label>
+                                <span class="text-[10px] text-slate-500 block">Allow a single phone number to create/have multiple active admission applications.</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                            <label class="block font-bold text-slate-900">Draft Expiration Timeframe (Days)</label>
+                            <input type="number" x-model="settings.draftExpirationDays" min="1" max="365" class="w-full p-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-bold outline-none focus:ring-2 focus:ring-amber-500">
+                            <span class="text-[10px] text-slate-500 block">Number of days of inactivity before an incomplete draft application is marked as EXPIRED.</span>
+                        </div>
+
                         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
                             <h5 class="font-bold text-slate-900">Password Complexity & Security Policies</h5>
                             <div class="grid grid-cols-2 gap-3">

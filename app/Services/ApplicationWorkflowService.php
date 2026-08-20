@@ -8,6 +8,8 @@ use App\Models\Application;
 use App\Models\ApplicationDocument;
 use App\Models\Payment;
 use App\Models\User;
+use App\Models\ApplicationActivity;
+use App\Models\Setting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -43,16 +45,56 @@ class ApplicationWorkflowService
                 ]
             );
 
+            $application = Application::where('applicant_id', $applicant->id)->latest('id')->first();
+            if ($application) {
+                $application->update([
+                    'current_step' => max($application->current_step, 3),
+                    'completion_percentage' => max($application->completion_percentage, 28),
+                    'last_activity_at' => now(),
+                ]);
+                $this->logActivity($application, 'Step 2 Completed', 'Applicant completed Personal Information.');
+            }
+
             AuditLogService::log('applicant_profile_updated', "Updated profile for user ID {$user->id}");
 
             return $applicant;
         });
     }
 
-    public function initializeOrGetApplication(Applicant $applicant, int $programmeId, int $academicYearId, int $intakeId, string $admissionType): Application
+    public function logActivity(Application $application, string $action, string $description): ApplicationActivity
+    {
+        return ApplicationActivity::create([
+            'application_id' => $application->id,
+            'action' => $action,
+            'description' => $description,
+        ]);
+    }
+
+    public function initializeOrGetApplication(Applicant $applicant, ?int $programmeId = null, ?int $academicYearId = null, ?int $intakeId = null, ?string $admissionType = null): Application
     {
         return DB::transaction(function () use ($applicant, $programmeId, $academicYearId, $intakeId, $admissionType) {
-            $appNumber = 'SUPA/' . date('Y') . '/' . str_pad((string) (Application::count() + 1), 5, '0', STR_PAD_LEFT);
+            // Find existing active draft/in-progress application first
+            $application = Application::where('applicant_id', $applicant->id)
+                ->whereNotIn('status', ['Approved', 'Rejected', 'Expired'])
+                ->latest('id')
+                ->first();
+
+            if ($application) {
+                $updates = [];
+                if ($programmeId) $updates['programme_id'] = $programmeId;
+                if ($academicYearId) $updates['academic_year_id'] = $academicYearId;
+                if ($intakeId) $updates['intake_id'] = $intakeId;
+                if ($admissionType) $updates['admission_type'] = $admissionType;
+
+                if (!empty($updates)) {
+                     $application->update($updates);
+                }
+                return $application->fresh(['payment']);
+            }
+
+            $year = date('Y');
+            $count = Application::whereYear('created_at', $year)->count() + 1;
+            $appNumber = 'SUPA-' . $year . '-' . str_pad((string) $count, 6, '0', STR_PAD_LEFT);
 
             $isPublic = false;
             if ($applicant->user) {
@@ -68,37 +110,36 @@ class ApplicationWorkflowService
                 }
             }
 
-            $application = Application::firstOrCreate(
-                [
-                    'applicant_id' => $applicant->id,
-                    'academic_year_id' => $academicYearId,
-                    'intake_id' => $intakeId,
-                ],
-                [
-                    'application_number' => $appNumber,
-                    'programme_id' => $programmeId,
-                    'admission_type' => $admissionType,
-                    'admission_category' => 'Direct Entry',
-                    'status' => 'Draft',
-                    'is_public_submission' => $isPublic,
-                ]
-            );
+            $application = Application::create([
+                'applicant_id' => $applicant->id,
+                'application_number' => $appNumber,
+                'programme_id' => $programmeId,
+                'academic_year_id' => $academicYearId,
+                'intake_id' => $intakeId,
+                'admission_type' => $admissionType ?? 'Form Six',
+                'admission_category' => 'Direct Entry',
+                'status' => 'Draft',
+                'is_public_submission' => $isPublic,
+                'current_step' => 1,
+                'completion_percentage' => 14,
+                'expires_at' => now()->addDays((int) Setting::get('draft_expiration_days', 30)),
+                'last_activity_at' => now(),
+            ]);
 
-            if ($application->wasRecentlyCreated === false && (int) $application->programme_id !== $programmeId) {
-                $application->update([
-                    'programme_id' => $programmeId,
-                    'admission_type' => $admissionType,
-                ]);
-            }
+            $this->logActivity($application, 'Application Started', 'Applicant initiated the admission application.');
 
             // Placeholder payment only — real NMB control number is requested after
             // academic info is saved (outside this DB transaction).
+            $amount = 20000;
+            if ($application->programme) {
+                $amount = $application->programme->application_fee ?? $amount;
+            }
+
             Payment::firstOrCreate(
                 ['application_id' => $application->id],
                 [
                     'control_number' => 'PENDING-'.$application->id,
-                    'amount' => $application->programme->application_fee
-                        ?? config('services.singida.default_amount', 20000),
+                    'amount' => $amount,
                     'currency' => 'TZS',
                     'payment_status' => 'pending',
                     'singida_synced' => false,
@@ -215,6 +256,13 @@ class ApplicationWorkflowService
                 array_merge($academicData, ['admission_type' => $admissionType])
             );
 
+            $application->update([
+                'current_step' => max($application->current_step, 4),
+                'completion_percentage' => max($application->completion_percentage, 42),
+                'last_activity_at' => now(),
+            ]);
+            $this->logActivity($application, 'Step 3 Completed', 'Applicant completed Academic Profile.');
+
             AuditLogService::log('academic_info_saved', "Saved academic profile for application {$application->application_number}");
 
             return $profile;
@@ -225,7 +273,7 @@ class ApplicationWorkflowService
     {
         $path = $file->store('documents/' . $application->application_number, 'public');
 
-        return ApplicationDocument::updateOrCreate(
+        $doc = ApplicationDocument::updateOrCreate(
             [
                 'application_id' => $application->id,
                 'document_type' => $documentType,
@@ -239,6 +287,15 @@ class ApplicationWorkflowService
                 'rejection_comment' => null,
             ]
         );
+
+        $application->update([
+            'current_step' => max($application->current_step, 7),
+            'completion_percentage' => max($application->completion_percentage, 85),
+            'last_activity_at' => now(),
+        ]);
+        $this->logActivity($application, 'Documents Uploaded', "Uploaded document: {$documentType}");
+
+        return $doc;
     }
 
     public function submitApplication(Application $application, string $signatureData, ?array $consentData = null): Application
@@ -254,10 +311,15 @@ class ApplicationWorkflowService
             }
 
             $application->update([
-                'status' => 'Pending Payment',
+                'status' => 'SUBMITTED',
                 'digital_signature_path' => $signaturePath,
                 'submitted_at' => now(),
+                'current_step' => 7,
+                'completion_percentage' => 100,
+                'last_activity_at' => now(),
             ]);
+
+            $this->logActivity($application, 'Application Submitted', 'Applicant submitted the final application review & signature.');
 
             // Save consent if provided
             if ($consentData) {

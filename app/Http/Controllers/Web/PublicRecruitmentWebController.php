@@ -31,6 +31,15 @@ class PublicRecruitmentWebController extends Controller
         protected OfferLetterService $offerLetterService
     ) {}
 
+    public function trackApplicationPage()
+    {
+        if (!\App\Models\Setting::get('enable_recruitment_module', true)) {
+            abort(404);
+        }
+
+        return view('public.careers.track-application');
+    }
+
     public function index(Request $request)
     {
         if (!\App\Models\Setting::get('enable_recruitment_module', true) || !\App\Models\Setting::get('enable_public_career_portal', true)) {
@@ -125,6 +134,37 @@ class PublicRecruitmentWebController extends Controller
             'selected_job_id' => $vacancy->id,
             'selected_job_number' => $vacancy->vacancy_number,
         ]);
+
+        if (\App\Models\Setting::get('enable_online_applications', true)) {
+            $campuses = Campus::where('status', 'active')->get();
+            
+            $positionType = 'other';
+            $designationName = strtolower($vacancy->designation->name ?? '');
+            $categoryName = strtolower($vacancy->category->name ?? '');
+            $title = strtolower($vacancy->job_title);
+
+            if (str_contains($designationName, 'teacher') || str_contains($designationName, 'tutor') || str_contains($designationName, 'lecturer') || str_contains($designationName, 'instructor') || str_contains($categoryName, 'teaching') || str_contains($title, 'teacher') || str_contains($title, 'developer') || str_contains($title, 'laravel')) {
+                $positionType = 'teacher';
+            } elseif (str_contains($designationName, 'accountant') || str_contains($designationName, 'finance') || str_contains($categoryName, 'finance') || str_contains($title, 'finance')) {
+                $positionType = 'accountant';
+            } elseif (str_contains($designationName, 'procurement') || str_contains($designationName, 'supplies') || str_contains($categoryName, 'procurement')) {
+                $positionType = 'procurement';
+            } elseif (str_contains($designationName, 'hr') || str_contains($designationName, 'human') || str_contains($categoryName, 'hr')) {
+                $positionType = 'hr';
+            } elseif (str_contains($designationName, 'ict') || str_contains($designationName, 'computer') || str_contains($designationName, 'it ') || str_contains($categoryName, 'ict')) {
+                $positionType = 'ict';
+            }
+
+            $draft = null;
+            if (Auth::check()) {
+                $draft = JobApplication::where('user_id', Auth::id())
+                    ->where('vacancy_id', $vacancy->id)
+                    ->whereNull('submitted_at')
+                    ->first();
+            }
+
+            return view('public.careers.apply', compact('vacancy', 'campuses', 'positionType', 'draft'));
+        }
 
         $applyUrl = $vacancy->external_url ?: 'https://ajiramarket.co.tz';
         return redirect()->away($applyUrl);

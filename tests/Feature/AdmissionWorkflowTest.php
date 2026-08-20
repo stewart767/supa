@@ -229,6 +229,15 @@ class AdmissionWorkflowTest extends TestCase
         $applicantUser = User::where('role', 'applicant')->first();
         $this->actingAs($applicantUser);
 
+        // Reset application to Draft and delete its documents for a clean wizard test state
+        if ($applicantUser->applicant) {
+            $app = \App\Models\Application::where('applicant_id', $applicantUser->applicant->id)->latest('id')->first();
+            if ($app) {
+                $app->update(['status' => 'Draft']);
+                $app->documents()->delete();
+            }
+        }
+
         // Save Personal Info
         $this->postJson('/api/v1/applicant/personal-info', [
             'gender' => 'male',
@@ -302,6 +311,15 @@ class AdmissionWorkflowTest extends TestCase
 
         $applicantUser = User::where('role', 'applicant')->first();
         $this->actingAs($applicantUser);
+
+        // Reset application to Draft and delete its documents for a clean wizard test state
+        if ($applicantUser->applicant) {
+            $app = \App\Models\Application::where('applicant_id', $applicantUser->applicant->id)->latest('id')->first();
+            if ($app) {
+                $app->update(['status' => 'Draft']);
+                $app->documents()->delete();
+            }
+        }
 
         // Save Personal Info
         $this->postJson('/api/v1/applicant/personal-info', [

@@ -204,6 +204,12 @@
                                         <div class="text-base font-black text-emerald-700" x-text="'TZS ' + Number(activeProg.monthly_fee).toLocaleString() + '/='"></div>
                                         <span class="text-[10px] text-slate-500 font-semibold">Ndani ya miezi 10 ya masomo</span>
                                     </div>
+                                    <div class="col-span-full pt-3 border-t border-blue-200/50 flex flex-col sm:flex-row justify-between items-center gap-2 text-[11px] font-bold text-blue-900">
+                                        <span>Tayari umeanza kuomba? (Already started?)</span>
+                                        <a href="{{ route('public.track') }}" class="text-amber-600 hover:text-amber-700 hover:underline flex items-center gap-1">
+                                            Fuatilia kwa Control au Simu (Track & Continue) &rarr;
+                                        </a>
+                                    </div>
                                 </div>
 
                                 <!-- Entry Requirements Section -->
@@ -258,6 +264,10 @@
                                 </div>
 
                                 <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                                    <a href="{{ route('public.track') }}" class="px-5 py-3 rounded-2xl bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold text-xs shadow-sm transition-colors text-center flex items-center justify-center gap-1.5 w-full sm:w-auto">
+                                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                        <span>Fuatilia Maombi (Track Status)</span>
+                                    </a>
                                     <button type="button" @click="closeDetails()" class="px-5 py-3 rounded-2xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs shadow-sm transition-colors">
                                         Funga
                                     </button>

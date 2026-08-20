@@ -77,8 +77,11 @@ class SingidaPaymentCallbackController extends Controller
         $application = $payment->application;
         if ($application) {
             $updates = [];
-            if (in_array($application->status, ['Draft', 'Pending Payment'], true)) {
-                $updates['status'] = 'Under Review';
+            if (in_array($application->status, ['Draft', 'Pending Payment', 'PAYMENT_PENDING'], true)) {
+                $updates['status'] = 'IN_PROGRESS';
+                $updates['current_step'] = max($application->current_step, 6);
+                $updates['completion_percentage'] = max($application->completion_percentage, 71);
+                $updates['last_activity_at'] = now();
             }
             if (! empty($validated['singida_admission_id'])) {
                 $updates['singida_admission_id'] = $validated['singida_admission_id'];
@@ -86,6 +89,12 @@ class SingidaPaymentCallbackController extends Controller
             if ($updates) {
                 $application->update($updates);
             }
+
+            \App\Models\ApplicationActivity::create([
+                'application_id' => $application->id,
+                'action' => 'Payment Received',
+                'description' => "Singida callback: Payment of TZS " . number_format($payment->amount) . " received and verified.",
+            ]);
         }
 
         Log::info('Singida payment callback processed', [
