@@ -1,50 +1,44 @@
+# Disable directory listing
+Options -Indexes
+DirectoryIndex index.php
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
-        Options -MultiViews -Indexes
+        Options -MultiViews
     </IfModule>
 
     RewriteEngine On
-
-    # Block direct HTTP access to sensitive files and configs
-    RewriteRule ^(\.env|\.git|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml) - [F,L,NC]
-    RewriteRule ^(storage/logs/|database/.*\.sqlite) - [F,L,NC]
-
-    # Force HTTPS on live environment (supa.ac.tz)
-    RewriteCond %{HTTPS} off
-    RewriteCond %{HTTP_HOST} ^(www\.)?supa\.ac\.tz$ [NC]
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Serve storage files directly if they exist
-    RewriteCond %{REQUEST_URI} ^/storage/(.*)$
-    RewriteCond %{DOCUMENT_ROOT}/public/storage/%1 -f [OR]
-    RewriteCond %{DOCUMENT_ROOT}/public/storage/%1 -d
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Route build assets to public folder (always)
+    RewriteRule ^build/(.*)$ public/build/$1 [L]
+
+    # Route storage assets to public folder (always)
     RewriteRule ^storage/(.*)$ public/storage/$1 [L]
 
-    # Serve storage files directly from storage/app/public fallback
-    RewriteCond %{REQUEST_URI} ^/storage/(.*)$
-    RewriteRule ^storage/(.*)$ storage/app/public/$1 [L]
+    # Redirect root requests to index.php directly
+    RewriteRule ^$ index.php [L]
 
-    # Redirect root request to public/index.php directly
-    RewriteRule ^$ public/index.php [L]
-
-    # Transparently route other requests to public/ directory
-    RewriteCond %{REQUEST_URI} !^/public/
-    RewriteCond %{REQUEST_URI} !^/storage/
-    RewriteCond %{REQUEST_FILENAME} !-f
+    # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ public/$1 [L]
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
 </IfModule>
 
-<IfModule mod_mime.c>
-    AddType application/javascript .js .mjs
-    AddType text/css .css
-    AddType image/svg+xml .svg .svgz
-    AddType font/woff2 .woff2
-    AddType font/woff .woff
-    AddType font/ttf .ttf
-    AddType image/webp .webp
-</IfModule>
+# Prevent access to sensitive files
+<FilesMatch "^(\.env|\.git|composer\.(json|lock)|package\.(json|lock)|artisan|README\.md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
