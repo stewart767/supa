@@ -68,6 +68,12 @@ class PublicPortalController extends Controller
             'has_admission_letter' => (bool) $app->admissionLetter,
             'masked_phone' => $maskedPhone,
             'user_id' => $user->id,
+            'payment' => $app->payment ? [
+                'control_number' => $app->payment->control_number,
+                'amount' => $app->payment->amount,
+                'payment_status' => $app->payment->payment_status,
+                'singida_synced' => (bool) $app->payment->singida_synced,
+            ] : null,
         ]);
     }
 

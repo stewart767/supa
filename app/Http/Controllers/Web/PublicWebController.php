@@ -122,6 +122,11 @@ class PublicWebController extends Controller
         return view('pdf.admission-steps-guide');
     }
 
+    public function paymentGuideline()
+    {
+        return view('pdf.payment-guideline');
+    }
+
     public function downloadAdmissionExcel()
     {
         $filename = 'FOMU_YA_MAOMBI_YA_UDAHILI_REQUIREMENTS_SUPA.csv';

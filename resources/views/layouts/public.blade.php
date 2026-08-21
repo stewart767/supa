@@ -62,7 +62,7 @@
           mobileMenu: false, 
           programmeMenu: false, 
           admissionMenu: false,
-          admissionModal: true,
+          admissionModal: {{ request()->routeIs('home') ? 'true' : 'false' }},
           admissionStep: 1,
           progSearch: '',
           modalProgrammes: {{ json_encode($modalProgrammesList) }},
@@ -639,7 +639,7 @@
                  x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                  @click.stop
                  class="relative transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all duration-300 w-full border border-slate-100"
-                 :class="admissionStep === 2 ? 'max-w-4xl p-5 sm:p-8 text-left' : 'max-w-2xl p-8 sm:p-12 text-center'">
+                 :class="admissionStep === 2 ? 'max-w-4xl p-5 sm:p-8 text-left' : 'max-w-3xl p-8 sm:p-12 text-center'">
                 
                 <!-- STEP 1: Welcome & Initial Prompt -->
                 <div x-show="admissionStep === 1" 
@@ -673,35 +673,121 @@
                         </p>
                     </div>
 
-                    <!-- Swahili Prompt -->
-                    <p class="text-base sm:text-lg font-medium text-slate-700 max-w-xl mx-auto leading-relaxed">
-                        Je, ungependa <strong class="font-extrabold text-slate-900">kuanza usajili</strong> sasa, au <strong class="font-extrabold text-slate-900">kuendelea kutazama tovuti</strong> bila kuingia kwenye fomu ya maombi?
-                    </p>
-
-                    <!-- English Subtitle -->
-                    <p class="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto leading-normal">
-                        Online admission is open. Do you want to <strong class="font-semibold text-slate-700">start registration</strong> now, or <strong class="font-semibold text-slate-700">continue browsing</strong> the website?
-                    </p>
-
-                    <!-- Action Buttons -->
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                        <button type="button"
-                                @click="admissionStep = 2" 
-                                class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#ff5500] hover:bg-[#e04b00] text-white font-black text-sm sm:text-base shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2 cursor-pointer">
-                            <span>Anza usajili</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                        </button>
-                        <button type="button" 
-                                @click="closeAdmissionModal()" 
-                                class="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-white border-2 border-slate-200 hover:border-slate-300 text-slate-800 hover:bg-slate-50 font-bold text-sm sm:text-base shadow-sm active:scale-95 transition-all text-center cursor-pointer">
-                            Endelea kutazama tovuti
-                        </button>
+                    <!-- Swahili Prompt & English Subtitle -->
+                    <div class="space-y-2">
+                        <p class="text-base sm:text-lg font-medium text-slate-700 max-w-xl mx-auto leading-relaxed">
+                            Je, ungependa kuanza usajili mpya wa udahili, au kufuatilia maombi yako ya sasa?
+                        </p>
+                        <p class="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto leading-normal">
+                            Would you like to start a new admission application, or track your current application?
+                        </p>
                     </div>
 
-                    <!-- Footer Hint -->
-                    <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed pt-2">
-                        Kama tayari una namba ya maombi, unaweza kuitumia baadaye kupitia kiungo &quot;Apply Now&quot; au ukurasa wa maombi.
-                    </p>
+                    <!-- Action Choice Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-2">
+                        <!-- Card 1: Start Application -->
+                        <div class="relative group rounded-3xl border border-slate-200 bg-slate-50/50 p-6 flex flex-col justify-between text-left hover:border-orange-200 hover:bg-orange-50/10 transition-all duration-300 shadow-sm hover:shadow-md">
+                            <div class="space-y-4">
+                                <div class="w-12 h-12 rounded-2xl bg-orange-100 text-orange-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-1.5">
+                                        Anza Usajili Mpya
+                                    </h3>
+                                    <p class="text-xs text-slate-600 mt-1 leading-normal">
+                                        Sajili maombi mapya ya udahili kwa kozi za Stashahada na Shahada.
+                                    </p>
+                                    <p class="text-[11px] text-slate-400 mt-1 leading-normal">
+                                        Start a new application for Certificate, Diploma & Degree programs.
+                                    </p>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    @click="admissionStep = 2" 
+                                    class="w-full mt-6 px-5 py-3 rounded-2xl bg-[#ff5500] hover:bg-[#e04b00] text-white font-black text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2 cursor-pointer">
+                                <span>Anza Usajili</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- Card 2: Track Application -->
+                        <div class="relative group rounded-3xl border border-slate-200 bg-slate-50/50 p-6 flex flex-col justify-between text-left hover:border-blue-200 hover:bg-blue-50/10 transition-all duration-300 shadow-sm hover:shadow-md">
+                            <div class="space-y-4">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-1.5">
+                                        Fuatilia Maombi
+                                    </h3>
+                                    <p class="text-xs text-slate-600 mt-1 leading-normal">
+                                        Fuatilia maendeleo au kamilisha fomu ya maombi uliyokwisha anza.
+                                    </p>
+                                    <p class="text-[11px] text-slate-400 mt-1 leading-normal">
+                                        Track application progress or complete an ongoing application form.
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="{{ route('public.track') }}"
+                               @click="closeAdmissionModal()"
+                               class="w-full mt-6 px-5 py-3 rounded-2xl bg-white border-2 border-blue-600 hover:border-blue-700 text-blue-700 hover:bg-blue-50 font-bold text-sm shadow-sm active:scale-95 transition-all text-center flex items-center justify-center gap-2 cursor-pointer">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <span>Fuatilia / Track</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- NMB Payment Guideline Section -->
+                    <div class="mt-6 p-4 sm:p-5 rounded-3xl bg-amber-50/50 border border-amber-200/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-left max-w-2xl mx-auto">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shadow-inner flex-shrink-0 mt-0.5">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <div class="space-y-0.5">
+                                <h4 class="text-sm font-black text-slate-900 leading-tight">
+                                    Maelekezo ya Malipo (NMB Payment Guideline)
+                                </h4>
+                                <p class="text-xs text-slate-600 leading-normal">
+                                    Mwongozo wa jinsi ya kulipa ada kupitia Benki (NMB) na mitandao ya simu.
+                                </p>
+                                <p class="text-[10px] text-slate-400 leading-normal">
+                                    Instructions for paying fees via NMB Bank and mobile money channels.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            <a href="{{ route('public.payment-guideline') }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-white border border-amber-300 hover:border-amber-400 text-amber-800 hover:bg-amber-50 font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                                <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <span>Soma / View</span>
+                            </a>
+                            <a href="{{ route('public.payment-guideline') }}?download=1" target="_blank" class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-md shadow-orange-500/10 hover:shadow-orange-500/20 transition-all flex items-center gap-1.5 cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Pakua / Download</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Muted Dismiss Action & Footer Hint -->
+                    <div class="space-y-4 pt-4">
+                        <div class="text-center">
+                            <button type="button" 
+                                    @click="closeAdmissionModal()" 
+                                    class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-white border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:bg-slate-50 font-black text-sm shadow-sm active:scale-95 transition-all text-center cursor-pointer">
+                                <span>Endelea kutazama tovuti (Continue browsing)</span>
+                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+                            Kama tayari una namba ya maombi, unaweza kuitumia baadaye kupitia kiungo &quot;Apply Now&quot; au ukurasa wa maombi.
+                        </p>
+                    </div>
                 </div>
 
                 <!-- STEP 2: POP-OUT PROGRAMMES OFFERED -->

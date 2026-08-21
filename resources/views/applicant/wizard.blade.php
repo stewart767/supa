@@ -1507,14 +1507,24 @@
 
             <!-- Step 5: Automatic Payment Detection (TZS 20,000) -->
             <div x-show="currentStep === 5" x-cloak class="space-y-6">
-                <div class="border-b border-slate-100 pb-4">
-                    <h3 class="text-xl font-extrabold text-slate-900">Step 5: Malipo ya Ada ya Fomu ya Maombi (TZS 20,000/=)</h3>
-                    <p class="text-xs text-slate-500">Lipia ada ya fomu ya maombi ya TZS 20,000 kwa kutumia NMB Control Number hapo chini. Mfumo utatambua malipo yako kiotomatiki mara tu utakapokamilisha malipo kupitia simu au benki bila kuhitaji kupakia risiti yoyote.</p>
+                <div class="border-b border-slate-100 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-xl font-extrabold text-slate-900">Step 5: Malipo ya Ada ya Fomu ya Maombi (TZS 20,000/=)</h3>
+                        <p class="text-xs text-slate-500">Lipia ada ya fomu ya maombi ya TZS 20,000 kwa kutumia NMB Control Number hapo chini. Mfumo utatambua malipo yako kiotomatiki mara tu utakapokamilisha malipo kupitia simu au benki bila kuhitaji kupakia risiti yoyote.</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{{ route('public.payment-guideline') }}" target="_blank" class="px-4 py-2 rounded-xl bg-white border border-slate-350 hover:border-slate-400 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all text-center flex items-center gap-1.5 cursor-pointer">
+                            👁️ View PDF Guideline
+                        </a>
+                        <a href="{{ route('public.payment-guideline') }}?download=1" target="_blank" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-xs font-bold text-white transition-all text-center flex items-center gap-1.5 cursor-pointer">
+                            📥 Download PDF
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Control Number & Payment Instructions Box -->
                 <div class="p-8 rounded-3xl bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white border border-blue-950 shadow-2xl space-y-5">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-white/20 pb-5">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div class="space-y-1">
                             <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 block">NMB Control Number</span>
                             <div class="flex items-center gap-3">
@@ -1554,35 +1564,137 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Payment Channels Info -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-white pt-1">
-                        <div class="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1.5">
-                            <div class="flex items-center gap-2">
-                                <span class="text-lg">📱</span>
-                                <span class="font-extrabold text-amber-300">Malipo kwa Simu ya Mkononi (Mobile Money)</span>
+                <!-- PDF Step-by-Step Instructions Container -->
+                <div x-data="{ activeTab: 'mobile' }" class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm text-left space-y-4">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                            <span>📋</span> Maelekezo ya Hatua kwa Hatua (PDF Guidelines)
+                        </h3>
+                    </div>
+
+                    <!-- Tab Navigation -->
+                    <div class="flex flex-wrap border-b border-slate-150 gap-1">
+                        <button type="button" @click="activeTab = 'mobile'" :class="activeTab === 'mobile' ? 'border-blue-600 text-blue-600 bg-blue-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'" class="px-4 py-2.5 rounded-t-xl border-b-2 text-xs font-bold transition-all cursor-pointer">
+                            📱 Mobile Money
+                        </button>
+                        <button type="button" @click="activeTab = 'nmb_mkononi'" :class="activeTab === 'nmb_mkononi' ? 'border-blue-600 text-blue-600 bg-blue-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'" class="px-4 py-2.5 rounded-t-xl border-b-2 text-xs font-bold transition-all cursor-pointer">
+                            🏦 NMB Mkononi (USSD & App)
+                        </button>
+                        <button type="button" @click="activeTab = 'bank'" :class="activeTab === 'bank' ? 'border-blue-600 text-blue-600 bg-blue-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'" class="px-4 py-2.5 rounded-t-xl border-b-2 text-xs font-bold transition-all cursor-pointer">
+                            🏢 Tawi la NMB / Wakala
+                        </button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div class="text-xs text-slate-700 space-y-4 pt-1">
+                        
+                        <!-- Tab 1: Mobile Money -->
+                        <div x-show="activeTab === 'mobile'" class="space-y-4" x-cloak>
+                            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-100 text-emerald-800 text-[11px] leading-relaxed">
+                                ℹ️ Namba ya Kampuni (Business Number) ni <strong>888999</strong> na Reference ni Namba ya Malipo (Control Number): <strong class="font-mono text-amber-600" x-text="payment.control_number || 'SASXXXXXXXXXXX'"></strong>.
                             </div>
-                            <p class="text-blue-100 text-[11px] leading-relaxed">
-                                <strong>M-Pesa / TigoPesa / Airtel Money / Halopesa:</strong><br>
-                                1. Piga menyu ya mtandao wako (mf. *150*00# au *150*01#)<br>
-                                2. Chagua <strong>Lipa kwa Namba ya Kumbukumbu / Control Number</strong><br>
-                                3. Weka Control Number: <strong class="font-mono text-amber-300" x-text="payment.control_number || '---'"></strong><br>
-                                4. Thibitisha kiasi <strong>TZS 20,000</strong> na uweke PIN yako.
-                            </p>
-                        </div>
-                        <div class="p-4 rounded-2xl bg-white/10 border border-white/15 space-y-1.5">
-                            <div class="flex items-center gap-2">
-                                <span class="text-lg">🏦</span>
-                                <span class="font-extrabold text-amber-300">Malipo kwa Benki au Wakala (NMB / CRDB)</span>
+
+                            <!-- Vodacom M-Pesa -->
+                            <div class="space-y-1.5">
+                                <h4 class="font-extrabold text-orange-600 text-[11px] uppercase tracking-wider">Vodacom M-Pesa</h4>
+                                <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-normal">
+                                    <li>Piga <strong>*150*00#</strong>, kisha chagua <strong>4 [Lipa kwa M-Pesa]</strong></li>
+                                    <li>Chagua <strong>4 [Weka namba ya kampuni / Enter Business Number]</strong></li>
+                                    <li>Ingiza Namba ya Kampuni: <strong>888999</strong></li>
+                                    <li>Ingiza Kumbukumbu ya Malipo: Jaza Namba ya Malipo (Control Number) hapo juu</li>
+                                    <li>Weka kiasi: <strong>TZS 20,000/=</strong>, kisha weka PIN na uthibitishe malipo.</li>
+                                </ol>
                             </div>
-                            <p class="text-blue-100 text-[11px] leading-relaxed">
-                                <strong>Tawi lolote la NMB au Wakala wa NMB/CRDB:</strong><br>
-                                1. Fika kwa Wakala au Tawi la Benki<br>
-                                2. Mpatie muhudumu <strong>Control Number</strong> hapo juu<br>
-                                3. Fanya malipo ya <strong>TZS 20,000/=</strong><br>
-                                4. Mfumo utatambua malipo yako moja kwa moja bila kupakia risiti.
-                            </p>
+
+                            <!-- Tigo Pesa -->
+                            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                                <h4 class="font-extrabold text-sky-600 text-[11px] uppercase tracking-wider">Tigo Pesa</h4>
+                                <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-normal">
+                                    <li>Piga <strong>*150*01#</strong>, kisha chagua <strong>4 [Lipia Bili / Pay Bills]</strong></li>
+                                    <li>Chagua <strong>3 [Ingiza Namba ya Kampuni / Enter Business Number]</strong></li>
+                                    <li>Ingiza Namba ya Kampuni: <strong>888999</strong></li>
+                                    <li>Ingiza Kumbukumbu ya Malipo: Jaza Namba ya Malipo (Control Number) hapo juu</li>
+                                    <li>Weka kiasi: <strong>TZS 20,000/=</strong>, kisha weka PIN na uthibitishe malipo.</li>
+                                </ol>
+                            </div>
+
+                            <!-- Airtel Money -->
+                            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                                <h4 class="font-extrabold text-red-600 text-[11px] uppercase tracking-wider">Airtel Money</h4>
+                                <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-normal">
+                                    <li>Piga <strong>*150*60#</strong>, kisha chagua <strong>5 [Lipia Bili / Pay Bills]</strong></li>
+                                    <li>Chagua <strong>4 [Ingiza Namba ya Kampuni / Enter Business Number]</strong></li>
+                                    <li>Ingiza Namba ya Kampuni: <strong>888999</strong></li>
+                                    <li>Ingiza Kumbukumbu ya Malipo: Jaza Namba ya Malipo (Control Number) hapo juu</li>
+                                    <li>Weka kiasi: <strong>TZS 20,000/=</strong>, kisha weka PIN na uthibitishe malipo.</li>
+                                </ol>
+                            </div>
                         </div>
+
+                        <!-- Tab 2: NMB Mkononi -->
+                        <div x-show="activeTab === 'nmb_mkononi'" class="space-y-4" x-cloak>
+                            <!-- NMB Mkononi USSD -->
+                            <div class="space-y-1.5">
+                                <h4 class="font-extrabold text-blue-900 text-[11px] uppercase tracking-wider">NMB Mkononi (*150*66#)</h4>
+                                <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-normal">
+                                    <li>Dial/Piga <strong>*150*66#</strong> kwenye simu yako.</li>
+                                    <li>Weka namba ya siri (PIN) ya NMB Mkononi.</li>
+                                    <li>Chagua <strong>2 [LIPA BILI / PAY BILLS]</strong>.</li>
+                                    <li>Chagua <strong>5 [CHAGUA BIASHARA / CHOOSE BUSINESS]</strong>.</li>
+                                    <li>Chagua <strong>3 [WEKA NAMBA YA BIASHARA / ENTER BUSINESS NUMBER]</strong>.</li>
+                                    <li>Weka namba ya biashara: <strong>999999</strong>.</li>
+                                    <li>Weka kumbukumbu (Reference number): Ingiza Namba ya Malipo (Control Number) hapo juu.</li>
+                                    <li>Ingiza kiasi: <strong>TZS 20,000/=</strong> kisha thibitisha kwa kuweka PIN yako.</li>
+                                </ol>
+                            </div>
+
+                            <!-- NMB Mkononi App -->
+                            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                                <h4 class="font-extrabold text-blue-900 text-[11px] uppercase tracking-wider">NMB Mkononi App</h4>
+                                <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-normal">
+                                    <li>Fungua NMB Mkononi App na uingize PIN yako.</li>
+                                    <li>Chagua <strong>Bill Payment (Malipo ya Bili)</strong>.</li>
+                                    <li>Chagua <strong>Other Billers (Watoa Bili Wengine)</strong>.</li>
+                                    <li>Kwenye sanduku la utafutaji (Search), tafuta na uchague <strong>SINGIDA TEACHERS COLLEGE</strong>.</li>
+                                    <li>Weka Reference Number: Jaza Namba ya Malipo (Control Number) hapo juu.</li>
+                                    <li>Ingiza kiasi cha malipo, thibitisha taarifa na ukamilishe malipo.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: NMB Branch / Wakala -->
+                        <div x-show="activeTab === 'bank'" class="space-y-4" x-cloak>
+                            <!-- NMB Branches -->
+                            <div class="space-y-1.5">
+                                <h4 class="font-extrabold text-blue-950 text-[11px] uppercase tracking-wider">Kupitia Tawi la NMB (Branch Counter)</h4>
+                                <p class="text-slate-500 text-[10px] font-semibold leading-relaxed mb-1">
+                                    Jaza karatasi ya malipo (Bills Payment Slip) inayopatikana katika matawi yote ya NMB kote nchini:
+                                </p>
+                                <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-normal">
+                                    <li>Andika <strong>Bill Number</strong>: Jaza Namba ya Malipo (Control Number) hapo juu</li>
+                                    <li>Andika <strong>Biller Name</strong>: Jaza <strong>SINGIDA TEACHERS COLLEGE</strong></li>
+                                    <li>Jaza kiasi: <strong>TZS 20,000/=</strong></li>
+                                    <li>Wasilisha karatasi ya malipo na fedha taslimu kwa keshia wa benki ili kukamilisha muamala.</li>
+                                </ol>
+                            </div>
+
+                            <!-- NMB Wakala -->
+                            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                                <h4 class="font-extrabold text-blue-950 text-[11px] uppercase tracking-wider">Kupitia NMB Wakala (NMB Agent)</h4>
+                                <p class="text-slate-500 text-[10px] font-semibold leading-relaxed mb-1">
+                                    Hakikisha wakala anatumia mfumo sahihi wa NMB Bills Payment na anakupatia risiti rasmi ya benki:
+                                </p>
+                                <ol class="list-decimal pl-4 space-y-1 text-slate-600 leading-normal">
+                                    <li>Mpatie wakala Namba ya Malipo (Control Number) hapo juu.</li>
+                                    <li>Mwambie mlipwaji ni <strong>SINGIDA TEACHERS COLLEGE</strong>.</li>
+                                    <li>Mpatie kiasi cha fedha taslimu (<strong>TZS 20,000/=</strong>).</li>
+                                    <li>Wakala atakamilisha malipo na kukupatia risiti rasmi iliyochapishwa na benki.</li>
+                                </ol>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 

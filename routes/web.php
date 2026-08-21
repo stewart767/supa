@@ -32,6 +32,7 @@ Route::get('/faqs', [PublicWebController::class, 'faqs'])->name('public.faqs');
 Route::get('/downloads', [PublicWebController::class, 'downloads'])->name('public.downloads');
 Route::get('/student-guide', [PublicWebController::class, 'studentGuide'])->name('public.student-guide');
 Route::get('/downloads/admission-steps-guide', [PublicWebController::class, 'admissionStepsGuide'])->name('public.admission-steps-guide');
+Route::get('/downloads/payment-guideline', [PublicWebController::class, 'paymentGuideline'])->name('public.payment-guideline');
 Route::get('/downloads/admission-requirements-excel', [PublicWebController::class, 'downloadAdmissionExcel'])->name('public.download.admission-excel');
 Route::get('/contact', [PublicWebController::class, 'contact'])->name('public.contact');
 Route::get('/privacy-policy', [PublicWebController::class, 'privacyPolicy'])->name('public.privacy');
